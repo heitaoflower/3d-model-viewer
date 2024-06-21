@@ -2,15 +2,29 @@
 #include "defines.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include <unistd.h>
-#include <libgen.h>
+#include <string>
+#include <algorithm>
 
+#ifdef PLATFORM_WINDOWS
+#include <direct.h>
+#define chdir _chdir
+#define PATH_SEPARATOR '\\'
+#else
+#include <unistd.h>
+#define PATH_SEPARATOR '/'
+#endif
+
+std::string dirname(const std::string &path)
+{
+    size_t pos = path.find_last_of(PATH_SEPARATOR);
+    return (std::string::npos == pos) ? "" : path.substr(0, pos);
+}
 
 int main(int argc, char *argv[])
 {
-    char *dir = dirname(argv[0]);
+    std::string dir = dirname(argv[0]);
 
-    if (chdir(dir) != 0)
+    if (chdir(dir.c_str()) != 0)
     {
         Log::Error("Chyba při změně pracovního adresáře.");
         return 1;
