@@ -2,12 +2,11 @@
 #include <cstdint>
 #include <string>
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #endif
 #include <fstream>
 #include <iostream>
-
-// define NOMINMAX před windows.h -> jinak to rozbije assimp
 
 class Log
 {
