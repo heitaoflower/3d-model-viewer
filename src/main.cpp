@@ -5,7 +5,7 @@
 #include <string>
 #include <algorithm>
 
-#ifdef PLATFORM_WINDOWS
+#ifdef _WIN32
 #include <direct.h>
 #define chdir _chdir
 #define PATH_SEPARATOR '\\'

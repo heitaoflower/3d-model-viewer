@@ -81,7 +81,6 @@ include_directories(${CMAKE_SOURCE_DIR}/dependencies/nativefiledialog-extended/s
 add_subdirectory(${CMAKE_SOURCE_DIR}/dependencies/nativefiledialog-extended/)
 ##
 
-
 file(GLOB_RECURSE SOURCES "src/*.hpp" "src/*.cpp" "src/*.h")
 
 add_executable(3DViewer ${SOURCES})

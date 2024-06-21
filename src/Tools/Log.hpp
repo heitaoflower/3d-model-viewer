@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <cstdint>
 #include <string>
-#ifdef PLATFORM_WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #include <fstream>
