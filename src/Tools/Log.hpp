@@ -15,7 +15,18 @@ class Log
     uint32_t errorCount, warningCount;
 
   public:
-    static void LogError(const std::string &errorMesage);
-    static void LogWarning(const std::string &warningMesage);
-    static void LogInfo(const std::string &informationMesage);
+    template<typename... Args>
+    static void Error(Args... args) {
+        (std::cout << ... << args) << std::endl;
+    }
+
+    template<typename... Args>
+    static void Warn(Args... args) {
+        (std::cout << ... << args) << std::endl;
+    }
+
+    template<typename... Args>
+    static void Info(Args... args) {
+        (std::cout << ... << args) << std::endl;
+    }
 };

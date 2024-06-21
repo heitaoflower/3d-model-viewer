@@ -50,7 +50,7 @@ void Core::CreateRenderTargets(int32_t width, int32_t height)
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                               GL_RENDERBUFFER, s_render_target_depthbuffer);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        Log::LogError("There was a error while creating framebuffer");
+        Log::Error("There was a error while creating framebuffer");
 }
 
 void Core::RecreateTargetTexture(int32_t width, int32_t height)
@@ -72,7 +72,7 @@ void Core::RecreateTargetTexture(int32_t width, int32_t height)
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                               GL_RENDERBUFFER, s_render_target_depthbuffer);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        Log::LogError("There was a error while creating framebuffer");
+        Log::Error("There was a error while creating framebuffer");
 }
 
 void Core::StartRenderingToTexture(glm::vec2 viewportSize)

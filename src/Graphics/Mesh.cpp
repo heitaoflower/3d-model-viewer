@@ -47,15 +47,6 @@ void Mesh::SetMesh()
 
 const void Mesh::DrawArrays(Shader &shader, bool manualySetTextures) const
 {
-    if (!manualySetTextures)
-    {
-        // for (unsigned int i = 0; i < textures.size(); i++)
-        // {
-        //     glActiveTexture(GL_TEXTURE0 +
-        //                     i); // aktivovat správnou texturu na pozici i
-        //     glBindTexture(GL_TEXTURE_2D, textures[i].id);
-        // }
-    }
     // vykreslit mesh
     glBindVertexArray(m_VAO);
 

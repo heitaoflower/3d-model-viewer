@@ -34,12 +34,12 @@ void Shader::ParseAndCreateShaders()
         m_vertexShaderCode = vertexShaderCodeStream.str();
         m_fragmentShaderCode = fragmentShaderCodeStream.str();
 
-        Log::LogInfo("Shadery: " + m_fragmentShaderPath + ' ' +
+        Log::Info("Shadery: " + m_fragmentShaderPath + ' ' +
                      m_vertexShaderPath + " uspesne nacteny!");
     }
     catch (std::ifstream::failure &e)
     {
-        Log::LogError("Shader: " + m_fragmentShaderPath + ' ' +
+        Log::Error("Shader: " + m_fragmentShaderPath + ' ' +
                       m_vertexShaderPath + " " + std::string(e.what()));
         throw e;
         return;
@@ -75,7 +75,7 @@ uint32_t Shader::CompileShader(uint32_t type, const std::string &shaderPath)
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
         char *message = new char[length];
         glGetShaderInfoLog(id, length, &length, message);
-        Log::LogError("Shader: compilation failed!" + std::string(message));
+        Log::Error("Shader: compilation failed!" + std::string(message));
 
         delete[] message;
         glDeleteShader(id);

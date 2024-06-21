@@ -70,6 +70,12 @@ bool Window::InitWindow(const uint32_t windowWidth, const uint32_t windowHeight,
     glfwSetCursorPosCallback(s_window, mouse_callback);
     glfwSetScrollCallback(s_window, scroll_callback);
 
+    // GLFWimage images[1];
+    // images[0].pixels =
+    //     stbi_load((std::string(GLOBAL_PATH) + "res/icon.png").c_str(),
+    //               &images[0].width, &images[0].height, 0, 4);
+    // glfwSetWindowIcon(s_window, 1, &images[0]);
+    // stbi_image_free(images[0].pixels);
     glfwSetFramebufferSizeCallback(s_window, framebuffer_size_callback);
 
     Core::InitEngine();
@@ -142,7 +148,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
         glfwGetWindowSize(Window::GetGLFWwindowRef(), &_width, &_height);
         Window::SetWindowSize(_width, _height);
 
-        Log::LogWarning("Aktualizuje se Framebuffer & Viewport velikost");
+        Log::Warn("Aktualizuje se Framebuffer & Viewport velikost");
 
         glViewport(0, 0, Window::GetWindowWidth(), Window::GetWindowHeight());
     }

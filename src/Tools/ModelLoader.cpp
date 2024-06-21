@@ -1,10 +1,26 @@
 ﻿#include "ModelLoader.hpp"
 
-ModelLoader::ModelLoader()
+std::string getExportTypeString(MODEL_EXPORT_TYPE exportType)
 {
-    m_model = nullptr;
-    m_texturePaths = std::vector<std::string>();
-    m_texture = 0;
+    switch (exportType)
+    {
+    case OBJ:
+        return "obj";
+    case GLTF:
+        return "gltf";
+    case FBX:
+        return "fbx";
+    default:
+        Log::Error("Unknown export type");
+        throw std::runtime_error("Unknown export type");
+    }
+}
+
+ModelLoader::ModelLoader()
+    : m_lastExportType(std::nullopt), m_texture(0),
+      m_waitingForUserInput(NO_INPUT), m_model(nullptr),
+      m_texturePaths(std::vector<std::string>())
+{
 }
 
 void ModelLoader::LoadSelectedModel()
@@ -31,7 +47,7 @@ void ModelLoader::LoadSelectedModel()
         }
         catch (const std::exception &e)
         {
-            Log::LogWarning("Model loading failed: " + std::string(e.what()));
+            Log::Warn("Model loading failed: " + std::string(e.what()));
             return;
         }
     }

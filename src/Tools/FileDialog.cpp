@@ -24,11 +24,11 @@ const std::string FileDialogManager::InvokeFileDialog()
     }
     else if (result == NFD_CANCEL)
     {
-        Log::LogError("User pressed cancel.");
+        Log::Error("User pressed cancel.");
     }
     else
     {
-        Log::LogError("Error: %s\n" + std::string(NFD_GetError()));
+        Log::Error("Error: %s\n" + std::string(NFD_GetError()));
     }
     return path;
 }

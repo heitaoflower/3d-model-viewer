@@ -6,7 +6,7 @@
 
 enum Cameras
 {
-    STATIC,
+    ARCBALL,
     FIRST_PERSON,
 };
 
@@ -33,6 +33,7 @@ class CameraSystem
     CameraSystem &operator=(CameraSystem &&) = delete;
     void SetInputState(bool state);
     void SetZoomMultiplier(float zoomMultiplier);
+
   private:
     CameraSystem() noexcept;
     ~CameraSystem() = default;

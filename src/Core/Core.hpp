@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Window.hpp"
 #include "../Tools/Log.hpp"
 #include <iostream>
 #include "Window.hpp"

@@ -13,19 +13,24 @@
 struct InputData
 {
   private:
-    glm::vec3 modelPos;
-    glm::vec3 modelRot;
-    glm::vec3 modelScale;
-    float modelRotAngle;
-
-  protected:
+    glm::vec3 m_modelPos;
+    glm::vec3 m_modelRot;
+    glm::vec3 m_modelScale;
+    float m_modelRotAngle;
+    bool m_allowCameraInput;
+    bool m_isLightShaderActive;
+    float m_lightIntensity;
+    bool m_wireframeMode;
     glm::mat4 model;
 
   public:
     InputData(glm::vec3 modelPos, glm::vec3 modelRot, glm::vec3 modelScale,
-              float modelRotAngle);
+              float modelRotAngle, bool allowCameraInput);
     const glm::mat4 GetModelMatrix() const;
-
+    const bool GetAllowCameraInput() const;
+    const bool GetIsLightShaderActive() const;
+    const float GetLightIntensity() const;
+    const bool GetWireframeMode() const;
     friend class WindowSystem;
 };
 
@@ -59,7 +64,8 @@ class WindowSystem
     inline void RenderCameraSettings();
     inline void RenderModelErrorWindow();
     inline void RenderTextureErrorWindow();
-    inline ImVec2 RenderMainMenuBar();
+    inline void RenderShaderSettings();
+    inline ImVec2 RenderMainMenuBar(bool isObjectRendered);
     inline void OpenModelSelectionDialog();
     inline void RenderGizmoSettings();
     InputData m_inputData;

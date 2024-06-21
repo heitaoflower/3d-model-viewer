@@ -10,15 +10,29 @@ bool WindowSystem::s_showTextureErrorWindow = false;
 bool WindowSystem::s_showModelErrorWindow = false;
 
 InputData::InputData(glm::vec3 modelPos, glm::vec3 modelRot,
-                     glm::vec3 modelScale, float modelRotAngle)
-    : modelPos(modelPos), modelRot(modelRot), modelScale(modelScale),
-      modelRotAngle(modelRotAngle)
+                     glm::vec3 modelScale, float modelRotAngle,
+                     bool allowCameraInput)
+    : m_modelPos(modelPos), m_modelRot(modelRot), m_modelScale(modelScale),
+      m_modelRotAngle(modelRotAngle), m_allowCameraInput(allowCameraInput),
+      m_isLightShaderActive(true), m_lightIntensity(0.5f),
+      m_wireframeMode(false)
 {
     model = glm::mat4(1.0f);
     model = glm::translate(model, modelPos);
     model = glm::rotate(model, glm::radians(modelRotAngle), modelRot);
     model = glm::scale(model, modelScale);
 }
+
+const bool InputData::GetAllowCameraInput() const { return m_allowCameraInput; }
+
+const bool InputData::GetIsLightShaderActive() const
+{
+    return m_isLightShaderActive;
+}
+
+const float InputData::GetLightIntensity() const { return m_lightIntensity; }
+
+const bool InputData::GetWireframeMode() const { return m_wireframeMode; }
 
 const glm::mat4 InputData::GetModelMatrix() const
 {
@@ -35,19 +49,25 @@ CameraSettings::CameraSettings() noexcept
 
 WindowSystem::WindowSystem()
     : m_inputData(glm::vec3(2.f, 0.f, -5.f), glm::vec3(1.0f), glm::vec3(1.0f),
-                  0.0f),
+                  0.0f, true),
       m_renderGizmo(false), m_gizmoOperation(ImGuizmo::TRANSLATE),
       m_gizmoSizeMultiplier(1.0f)
 {
 
     s_viewportWinSize = glm::vec2(uint32_t(500), uint32_t(500));
+    const int rounding = 5;
+    ImGui::GetStyle().FrameRounding = rounding;
+    ImGui::GetStyle().GrabRounding = rounding;
+    ImGui::GetStyle().ScrollbarRounding = rounding;
+    ImGui::GetStyle().TabRounding = rounding;
+    ImGui::GetStyle().ChildRounding = rounding;
+    ImGui::GetStyle().PopupRounding = rounding;
 }
 
 void WindowSystem::RenderWindows(bool isObjectRendered)
 {
-    ImVec2 mainMenuBarSize = this->RenderMainMenuBar();
+    ImVec2 mainMenuBarSize = this->RenderMainMenuBar(isObjectRendered);
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
-
     ImGui::Begin("Viewport", nullptr,
                  ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
@@ -69,9 +89,41 @@ void WindowSystem::RenderWindows(bool isObjectRendered)
                      ImVec2(s_viewportWinSize.x, s_viewportWinSize.y));
     else
     {
+        float windowWidth = ImGui::GetWindowSize().x;
+        float windowHeight = ImGui::GetWindowSize().y;
+
+        float textWidth = ImGui::CalcTextSize(u8"Není načtený žádný model").x;
+        float textHeight = ImGui::CalcTextSize(u8"Není načtený žádný model").y;
+
+        ImGui::SetCursorPos(ImVec2((windowWidth - textWidth) / 2.0f,
+                                   (windowHeight - textHeight) / 2.0f - 60.f));
         ImGui::Text(u8"Není načtený žádný model");
+
+        textWidth = ImGui::CalcTextSize(
+                        u8"Otevřete model pomocí menu Soubor -> Otevřít")
+                        .x;
+        textHeight = ImGui::CalcTextSize(
+                         u8"Otevřete model pomocí menu Soubor -> Otevřít")
+                         .y;
+
+        ImGui::SetCursorPos(ImVec2((windowWidth - textWidth) / 2.0f,
+                                   (windowHeight - textHeight) / 2.0f - 30.f));
         ImGui::Text(u8"Otevřete model pomocí menu Soubor -> Otevřít");
+
+        ImGui::Dummy(ImVec2(0, 10));
+        ImGui::Separator();
+        ImGui::Dummy(ImVec2(0, 10));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30, 10));
+        ImGui::SetCursorPosX((windowWidth - 120) / 2.0f);
+        if (ImGui::Button(u8"Načíst model", ImVec2(150, 50)))
+        {
+            OpenModelSelectionDialog();
+        }
+        ImGui::PopStyleVar();
     }
+    this->m_inputData.m_allowCameraInput =
+        (ImGui::IsWindowHovered() | !Window::GetCursorVisibility()) &
+        !m_renderGizmo;
 
     // Gizmo
     if (isObjectRendered && m_cameraSettings.cameraType != 1 && m_renderGizmo)
@@ -106,8 +158,16 @@ void WindowSystem::RenderWindows(bool isObjectRendered)
 
     RenderClearColorPicker();
     RenderModelInfo();
+    ImGui::Checkbox(u8"Wireframe", &m_inputData.m_wireframeMode);
+    ImGui::Separator();
+    if (m_renderGizmo)
+        ImGui::BeginDisabled();
     RenderCameraSettings();
+    if (m_renderGizmo)
+        ImGui::EndDisabled();
+
     RenderGizmoSettings();
+    RenderShaderSettings();
 
     if (!isObjectRendered)
         ImGui::EndDisabled();
@@ -124,6 +184,12 @@ void WindowSystem::OpenModelSelectionDialog()
     std::filesystem::path modelPath = path;
     std::string extension = modelPath.extension().string();
 
+    if (modelPath.empty())
+    {
+        Log::Info("Nebyl vybraný žádný soubor");
+        return;
+    }
+
     if (std::find(SUPPORTED_MODEL_EXTENSIONS.begin(),
                   SUPPORTED_MODEL_EXTENSIONS.end(),
                   extension) != SUPPORTED_MODEL_EXTENSIONS.end())
@@ -133,7 +199,7 @@ void WindowSystem::OpenModelSelectionDialog()
     else
     {
         s_showModelErrorWindow = true;
-        Log::LogInfo("Nebyl vybraný 3D model");
+        Log::Info("Nebyl vybraný správný 3D model");
     }
 }
 
@@ -154,6 +220,7 @@ void WindowSystem::RenderModelErrorWindow()
                 s_showModelErrorWindow = false;
                 ImGui::CloseCurrentPopup();
             }
+
             ImGui::EndPopup();
         }
     }
@@ -183,7 +250,28 @@ void WindowSystem::RenderTextureErrorWindow()
     }
 }
 
-ImVec2 WindowSystem::RenderMainMenuBar()
+void WindowSystem::RenderShaderSettings()
+{
+    ImGui::Text(u8"Nastavení shaderu");
+    ImGui::Checkbox(u8"Povolit jednoduché stínování",
+                    &m_inputData.m_isLightShaderActive);
+    if (!m_inputData.m_isLightShaderActive)
+    {
+        ImGui::BeginDisabled();
+    }
+
+    ImGui::SliderFloat(u8"Intenzita světla", &m_inputData.m_lightIntensity,
+                       0.0f, 1.0f);
+
+    if (!m_inputData.m_isLightShaderActive)
+    {
+        ImGui::EndDisabled();
+    }
+
+    ImGui::Separator();
+}
+
+ImVec2 WindowSystem::RenderMainMenuBar(bool isObjectRendered)
 {
     ImVec2 mainMenuBarSize = ImVec2(0, 0);
 
@@ -205,11 +293,17 @@ ImVec2 WindowSystem::RenderMainMenuBar()
             ImGui::EndMenu();
         }
 
+        if (!isObjectRendered)
+            ImGui::BeginDisabled();
+
+        if (!isObjectRendered)
+            ImGui::EndDisabled();
+
         if (m_cameraSettings.cameraType == 1)
         {
             ImGui::Separator();
             ImGui::Text(u8"Pohyb kamery pomocí WASD");
-            ImGui::Text(u8"Pro odemčení kurzoru stiskněte F1, pro zamčení F2");
+            ImGui::Text(u8"Pro odemčení kurzoru stiskněte F2, pro zamčení F1");
         }
 
         ImGui::EndMainMenuBar();
@@ -270,7 +364,7 @@ WindowSystem::RenderTexturesDialog(std::vector<std::string> textures)
                       SUPPORTED_TEXTURE_EXTENSIONS.end(),
                       extension) == SUPPORTED_TEXTURE_EXTENSIONS.end())
         {
-            Log::LogError("Nepodporovaný formát textury:" + texture);
+            Log::Error("Nepodporovaný formát textury:" + texture);
             s_showTextureErrorWindow = true;
             ImGui::End();
             return std::nullopt;
@@ -321,11 +415,11 @@ void WindowSystem::RenderGizmoSettings()
     }
 
     ImGui::SliderFloat(u8"Velikost gizma", &m_gizmoSizeMultiplier, 0.5, 1.5);
-    if (ImGui::RadioButton(u8"Přesun", m_gizmoOperation == 0))
+    if (ImGui::RadioButton(u8"Přesun", m_gizmoOperation == ImGuizmo::TRANSLATE))
         m_gizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::RadioButton(u8"Rotace", m_gizmoOperation == 1))
+    if (ImGui::RadioButton(u8"Rotace", m_gizmoOperation == ImGuizmo::ROTATE))
         m_gizmoOperation = ImGuizmo::ROTATE;
-    if (ImGui::RadioButton(u8"Škálování", m_gizmoOperation == 2))
+    if (ImGui::RadioButton(u8"Škálování", m_gizmoOperation == ImGuizmo::SCALE))
         m_gizmoOperation = ImGuizmo::SCALE;
 
     if (!m_renderGizmo)
@@ -370,11 +464,9 @@ void WindowSystem::RenderCameraSettings()
 
     ImGui::Separator();
 }
+
 void WindowSystem::ApplyGuiData()
 {
-
-    CameraSystem::GetInstance().SetInputState(!m_renderGizmo);
-
     if (m_cameraSettings.projectionType == 2)
     {
         CameraSystem::GetInstance().SetProjMatToPerspective(s_viewportWinSize);
@@ -386,7 +478,7 @@ void WindowSystem::ApplyGuiData()
 
     if (m_cameraSettings.cameraType == 0)
     {
-        CameraSystem::GetInstance().SetActiveCamera(Cameras::STATIC);
+        CameraSystem::GetInstance().SetActiveCamera(Cameras::ARCBALL);
     }
     else if (m_cameraSettings.cameraType == 1)
     {

@@ -21,6 +21,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin-int/${CMAKE_BUILD_TYP
 if(MSVC)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
+   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 endif()
 
 
@@ -48,7 +50,7 @@ include_directories(dependencies/stb_image/src)
 include_directories(dependencies/glad/src)
 include_directories(dependencies/glad/include)
 add_library(glad dependencies/glad/src/glad.c)
-#
+##
 
 # imgui
 include_directories(dependencies/imgui)

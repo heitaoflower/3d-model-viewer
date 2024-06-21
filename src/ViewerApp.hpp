@@ -7,8 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 720
 
 class ViewerApp
 {
@@ -16,11 +16,12 @@ class ViewerApp
     ViewerApp() = default;
     ~ViewerApp() = default;
 
-    void Run();
+    void Run(const std::string &initialModelPath);
 };
 
-inline void ViewerApp::Run()
+inline void ViewerApp::Run(const std::string &initialModelPath)
 {
+    std::string modelPath = initialModelPath;
     Window::InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "3D Model Viewer");
     Window::SetVsync(true);
     // GLDebug::EnableDebugMode();
@@ -33,11 +34,24 @@ inline void ViewerApp::Run()
     while (!Window::WindowShouldClose())
     {
         auto inputData = windowsSystem.GetInputData();
+        if (modelPath.size() > 0)
+        {
+            WindowSystem::s_modelPath = std::filesystem::path(initialModelPath);
+            modelPath.clear();
+        }
+
         Core::OnRenderStart();
         Core::StartRenderingToTexture(windowsSystem.GetViewportWinSize());
         CameraSystem::GetInstance().UpdateInput();
+        CameraSystem::GetInstance().SetInputState(
+            inputData.GetAllowCameraInput());
         modelLoader.LoadSelectedModel();
         modelLoader.RenderSelectedModel(inputData);
+        Renderer::GetInstance().SetLightShaderActive(
+            inputData.GetIsLightShaderActive());
+        Renderer::GetInstance().SetLightIntensity(
+            inputData.GetLightIntensity());
+        Renderer::GetInstance().SetWireframeMode(inputData.GetWireframeMode());
         windowsSystem.ApplyGuiData();
         PerfData::CollectPerformanceData();
         Core::FinishRenderingToTexture();

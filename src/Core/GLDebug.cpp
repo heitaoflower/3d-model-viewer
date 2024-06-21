@@ -9,7 +9,7 @@ void GLDebug::EnableDebugMode()
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr,
                           GL_TRUE);
 
-    Log::LogWarning("OpenGL Debug mode je Aktivni!");
+    Log::Warn("OpenGL Debug mode je Aktivni!");
 }
 
 GLenum GLDebug::CheckForError_(const char *file, int line)
@@ -42,7 +42,7 @@ GLenum GLDebug::CheckForError_(const char *file, int line)
             errorMessage = "INVALID_FRAMEBUFFER_OPERATION";
             break;
         }
-        Log::LogError(std::string(file) + " (" + std::to_string(line) + ") " +
+        Log::Error(std::string(file) + " (" + std::to_string(line) + ") " +
                       "-> " + errorMessage + " (" + std::to_string(errorCode) +
                       ")");
     }

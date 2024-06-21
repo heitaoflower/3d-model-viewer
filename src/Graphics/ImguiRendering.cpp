@@ -23,7 +23,7 @@ void ImguiRendering::InitImgui(GLFWwindow *window)
     if (font == nullptr)
     {
         // Font se nepodařilo načíst, zobrazíme chybovou zprávu
-        Log::LogError("Nepodařilo se načíst font: " + std::string(fontPath));
+        Log::Error("Nepodařilo se načíst font: " + std::string(fontPath));
     }
     else
     {

@@ -34,6 +34,7 @@ class FpsCamera
     void SetCameraFov(float fov);
     void SetCameraSensitivity(float sensitivity);
     void SetCameraPosition(glm::vec3 position);
+    void SetCameraMouseVisibility(bool isVisible);
 
     float GetFov() const;
     float GetSensitivity() const;

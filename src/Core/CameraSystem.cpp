@@ -1,7 +1,7 @@
 ﻿#include "CameraSystem.hpp"
 
 CameraSystem::CameraSystem() noexcept
-    : m_activeCamera(Cameras::STATIC), m_fpsCamera(70.f, 0.1f, 10.f),
+    : m_activeCamera(Cameras::ARCBALL), m_fpsCamera(70.f, 0.1f, 10.f),
       m_orbitalCamera(), m_inputState(false), m_zoomMultiplier(1.0f)
 {
 }
@@ -14,7 +14,7 @@ CameraSystem &CameraSystem::GetInstance()
 
 void CameraSystem::SetFov(const float fov, const glm::vec2 viewportSize)
 {
-    if (m_activeCamera == Cameras::STATIC)
+    if (m_activeCamera == Cameras::ARCBALL)
     {
         m_orbitalCamera.SetFov(fov, viewportSize);
     }
@@ -22,7 +22,7 @@ void CameraSystem::SetFov(const float fov, const glm::vec2 viewportSize)
 
 void CameraSystem::SetProjMatToOrtho()
 {
-    if (m_activeCamera == Cameras::STATIC)
+    if (m_activeCamera == Cameras::ARCBALL)
     {
         m_orbitalCamera.SetProjMatToOrtho();
     }
@@ -30,7 +30,7 @@ void CameraSystem::SetProjMatToOrtho()
 
 void CameraSystem::SetProjMatToPerspective(const glm::vec2 viewportSize)
 {
-    if (m_activeCamera == Cameras::STATIC)
+    if (m_activeCamera == Cameras::ARCBALL)
     {
         m_orbitalCamera.SetProjMatToPerspective(viewportSize);
     }
@@ -72,7 +72,6 @@ void CameraSystem::ProcessMouseScrollInput(const float definedXOffset,
 void CameraSystem::ProcessMouseInput(const float definedXPos,
                                      const float definedYPos)
 {
-
     if (!m_inputState)
     {
         return;
@@ -90,20 +89,22 @@ void CameraSystem::ProcessMouseInput(const float definedXPos,
 
 void CameraSystem::UpdateInput()
 {
+    if (!m_inputState)
+        return;
+
     Window::SetCursorVisible(m_fpsCamera.GetIsCursorVisible());
 
-    if (!m_inputState)
-    {
-        return;
-    }
-
     if (m_activeCamera == Cameras::FIRST_PERSON)
-    {
         m_fpsCamera.ProcessKeyboardInput();
-    }
 }
 
-void CameraSystem::SetInputState(bool state) { m_inputState = state; }
+void CameraSystem::SetInputState(bool state)
+{
+    if (!state)
+        m_fpsCamera.SetCameraMouseVisibility(!state);
+
+    m_inputState = state;
+}
 
 const glm::mat4 CameraSystem::GetViewMatrix() const
 {
@@ -124,7 +125,7 @@ const glm::mat4 CameraSystem::GetProjectionMatrix()
     {
     case Cameras::FIRST_PERSON:
         return m_fpsCamera.GetProjectionMatrix(viewportSize);
-    case Cameras::STATIC:
+    case Cameras::ARCBALL:
         return m_orbitalCamera.GetProjecionMatrix(viewportSize);
     }
 }

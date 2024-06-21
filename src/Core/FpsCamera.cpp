@@ -19,6 +19,11 @@ FpsCamera::FpsCamera(float fov, float sensitivity, float movementSpeed)
 
 bool FpsCamera::GetIsCursorVisible() const { return m_isCursorVisible; }
 
+void FpsCamera::SetCameraMouseVisibility(bool isVisible)
+{
+    m_isCursorVisible = isVisible;
+}
+
 void FpsCamera::ProcessKeyboardInput()
 {
     float speed = m_movementSpeed * PerfData::GetDeltaTime();

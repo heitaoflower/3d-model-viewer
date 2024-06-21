@@ -8,7 +8,7 @@ bool OpenglAPI::InitOpenglAPI()
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        Log::LogError("OpenglAPI (Glad) se nespustil!");
+        Log::Error("OpenglAPI (Glad) se nespustil!");
         return false;
     }
     else

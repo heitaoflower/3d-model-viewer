@@ -1,6 +1,7 @@
 ﻿#include "TextureLoader.hpp"
 
-uint32_t loadTexture(const std::string &directoryPath, uint32_t filtering, bool flipTexture)
+uint32_t loadTexture(const std::string &directoryPath, uint32_t filtering,
+                     bool flipTexture)
 {
     uint32_t m_textureID;
     glGenTextures(1, &m_textureID);
@@ -49,21 +50,22 @@ uint32_t loadTexture(const std::string &directoryPath, uint32_t filtering, bool 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
         else
-            Log::LogError("Neplatny filtering!");
+            Log::Error("Neplatny filtering!");
 
-        Log::LogInfo("Textura: " + directoryPath + " uspesne nactena!");
+        Log::Info("Textura: " + directoryPath + " uspesne nactena!");
 
         stbi_image_free(data);
     }
     else
     {
-        Log::LogError("Chyba! Textura: " + directoryPath + " nebyla nactena!");
+        Log::Error("Chyba! Textura: " + directoryPath + " nebyla nactena!");
         stbi_image_free(data);
     }
     return m_textureID;
 }
 
-void updateTexture(uint32_t textureID, const std::string &directoryPath, bool flipTexture)
+void updateTexture(uint32_t textureID, const std::string &directoryPath,
+                   bool flipTexture)
 {
     int width, height, colorChannels;
 
@@ -101,13 +103,13 @@ void updateTexture(uint32_t textureID, const std::string &directoryPath, bool fl
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Log::LogInfo("Textura: " + directoryPath + " uspesne nactena!");
+        Log::Info("Textura: " + directoryPath + " uspesne nactena!");
 
         stbi_image_free(data);
     }
     else
     {
-        Log::LogError("Chyba! Textura: " + directoryPath + " nebyla nactena!");
+        Log::Error("Chyba! Textura: " + directoryPath + " nebyla nactena!");
         throw std::runtime_error("Chyba! Textura: " + directoryPath +
                                  " nebyla nactena!");
         stbi_image_free(data);

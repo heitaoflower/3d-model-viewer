@@ -23,18 +23,18 @@ const void Model::DrawArrays(Shader &shader) const
 
 void Model::LoadModel(std::string directoryPath)
 {
+
     Assimp::Importer importer;
-    const aiScene *scene =
-        importer.ReadFile(directoryPath, aiProcess_Triangulate);
+    auto scene = importer.ReadFile(directoryPath, aiProcess_Triangulate);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
         !scene->mRootNode) // Pokud scene == null
     {
-        Log::LogError(importer.GetErrorString());
+        Log::Error(importer.GetErrorString());
         return;
     }
     else
-        Log::LogInfo("Model: " + directoryPath + " uspesne nacten!");
+        Log::Info("Model: " + directoryPath + " uspesne nacten!");
 
     m_directoryPath =
         m_directoryPath.substr(0, m_directoryPath.find_last_of('/'));
