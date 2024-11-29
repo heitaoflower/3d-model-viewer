@@ -5,8 +5,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-class FpsCamera
-{
+class FpsCamera {
   private:
     float m_yaw, m_pitch;
     float m_lastX, m_lastY;

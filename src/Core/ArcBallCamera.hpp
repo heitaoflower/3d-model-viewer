@@ -5,8 +5,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <optional>
 
-class ArcBallCamera
-{
+class ArcBallCamera {
   public:
     ArcBallCamera();
     ~ArcBallCamera();
@@ -27,9 +26,9 @@ class ArcBallCamera
 
     const glm::mat4 GetProjecionMatrix(const glm::vec2 viewportSize);
     const glm::mat4 GetViewMatrix() const;
-    const float GetFov() const;
-    const float GetNear() const;
-    const float GetFar() const;
+    float GetFov() const;
+    float GetNear() const;
+    float GetFar() const;
 
   private:
     void RecreateProjectionMatrix(const glm::vec2 viewportSize);

@@ -3,6 +3,7 @@ project(3DViewer)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(TDVIEWER_DEBUG)
@@ -33,25 +34,25 @@ set(GLFW_USE_WAYLAND ON CACHE BOOL "Enable Wayland support")
 
 set(GLFW_DIR "${CMAKE_SOURCE_DIR}/dependencies/glfw")
 add_subdirectory(${GLFW_DIR})
-include_directories(${GLFW_DIR}/include)
+include_directories(SYSTEM ${GLFW_DIR}/include)
 ##
 
 # GLM
-include_directories(dependencies/glm/)
+include_directories(SYSTEM dependencies/glm/)
 ##
 
 # stb_image
-include_directories(dependencies/stb_image/src)
+include_directories(SYSTEM dependencies/stb_image/src)
 ##
 
 # GLAD
-include_directories(dependencies/glad/src)
-include_directories(dependencies/glad/include)
+include_directories(SYSTEM dependencies/glad/src)
+include_directories(SYSTEM dependencies/glad/include)
 add_library(glad dependencies/glad/src/glad.c)
 ##
 
 # imgui
-include_directories(dependencies/imgui)
+include_directories(SYSTEM dependencies/imgui)
 file(GLOB IMGUI_SOURCES "dependencies/imgui/*.cpp"
 "dependencies/imgui/backends/imgui_impl_glfw.cpp"
 "dependencies/imgui/backends/imgui_impl_opengl3.cpp")
@@ -59,7 +60,7 @@ add_library(imgui ${IMGUI_SOURCES})
 ##
 
 # ImGuizmo
-include_directories(dependencies/ImGuizmo)
+include_directories(SYSTEM dependencies/ImGuizmo)
 file(GLOB IMGUIZMO_SOURCES "dependencies/ImGuizmo/*.cpp")
 add_library(imguizmo ${IMGUIZMO_SOURCES})
 ##
@@ -70,21 +71,22 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "Disable lib installing")
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "Disable treating warning as errors")
 
 set(ASSIMP_DIR "${CMAKE_SOURCE_DIR}/dependencies/assimp")
-include_directories(${ASSIMP_DIR}/include)
+include_directories(SYSTEM ${ASSIMP_DIR}/include)
 add_subdirectory(${ASSIMP_DIR})
 ##
 
 # NativeFileDialog
 set(NFD_INSTALL OFF CACHE BOOL "Disable lib installing")
 set(NFD_PORTAL ON CACHE BOOL "Enable linux portal")
-include_directories(${CMAKE_SOURCE_DIR}/dependencies/nativefiledialog-extended/src/include)
+include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/dependencies/nativefiledialog-extended/src/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/dependencies/nativefiledialog-extended/)
+set_target_properties(assimp PROPERTIES COMPILE_FLAGS "-w")
 ##
 
 file(GLOB_RECURSE SOURCES "src/*.hpp" "src/*.cpp" "src/*.h")
 
 add_executable(3DViewer ${SOURCES})
-
+target_compile_options(3DViewer PRIVATE -Wall -Wextra -Wno-unused-include -Wno-deprecated-copy-with-user-provided-dtor)
 if(WIN32) # Pokud je operační systém Windows
     set(CMAKE_C_COMPILER "cl")
     set(CMAKE_CXX_COMPILER "cl")
@@ -97,7 +99,7 @@ elseif(UNIX AND NOT APPLE) # Pokud je operační systém Linux
 
     if(NOT DEFINED CMAKE_BUILD_TYPE)
 		set(CMAKE_BUILD_TYPE Release)
-	endif()
-	target_link_libraries(3DViewer PUBLIC glad glfw imgui imguizmo assimp pthread nfd)
+    endif()
+    target_link_libraries(3DViewer PUBLIC glad glfw imgui imguizmo assimp pthread nfd)
 endif()
 

@@ -1,7 +1,6 @@
 ﻿#include "FpsCamera.hpp"
 
-FpsCamera::FpsCamera(float fov, float sensitivity, float movementSpeed)
-{
+FpsCamera::FpsCamera(float fov, float sensitivity, float movementSpeed) {
     m_fov = fov;
     m_yaw = -90.f;
     m_pitch = 0.f;
@@ -14,29 +13,27 @@ FpsCamera::FpsCamera(float fov, float sensitivity, float movementSpeed)
     m_isCursorVisible = true;
     m_cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);    // Kde se kamera nachází
     m_cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // Kam se kamera kouká
-    m_cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Vektor kamery ukazující nahoru
+    m_cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);     // Vektor kamery ukazující nahoru
 }
 
-bool FpsCamera::GetIsCursorVisible() const { return m_isCursorVisible; }
+bool FpsCamera::GetIsCursorVisible() const {
+    return m_isCursorVisible;
+}
 
-void FpsCamera::SetCameraMouseVisibility(bool isVisible)
-{
+void FpsCamera::SetCameraMouseVisibility(bool isVisible) {
     m_isCursorVisible = isVisible;
 }
 
-void FpsCamera::ProcessKeyboardInput()
-{
+void FpsCamera::ProcessKeyboardInput() {
     float speed = m_movementSpeed * PerfData::GetDeltaTime();
     if (Keyboard::IsKeyPressed(GLFW_KEY_W))
         m_cameraPos += speed * m_cameraFront;
     if (Keyboard::IsKeyPressed(GLFW_KEY_S))
         m_cameraPos -= speed * m_cameraFront;
     if (Keyboard::IsKeyPressed(GLFW_KEY_A))
-        m_cameraPos -=
-            glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * speed;
+        m_cameraPos -= glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * speed;
     if (Keyboard::IsKeyPressed(GLFW_KEY_D))
-        m_cameraPos +=
-            glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * speed;
+        m_cameraPos += glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * speed;
     if (Keyboard::IsKeyPressed(GLFW_KEY_SPACE))
         m_cameraPos -= speed * m_cameraUp;
     if (Keyboard::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
@@ -48,10 +45,8 @@ void FpsCamera::ProcessKeyboardInput()
         m_isCursorVisible = true;
 }
 
-void FpsCamera::ProcessMouseInput(float definedXPos, float definedYPos)
-{
-    if (m_firstMouse)
-    {
+void FpsCamera::ProcessMouseInput(float definedXPos, float definedYPos) {
+    if (m_firstMouse) {
         m_lastX = definedXPos;
         m_lastY = definedYPos;
         m_firstMouse = false;
@@ -78,8 +73,7 @@ void FpsCamera::ProcessMouseInput(float definedXPos, float definedYPos)
     m_cameraFront = glm::normalize(front);
 }
 
-void FpsCamera::ProcessSrollInput(float definedXOffset, float definedYOffset)
-{
+void FpsCamera::ProcessSrollInput(float definedXOffset, float definedYOffset) {
     m_fov -= definedYOffset;
     if (m_fov < 1.0f)
         m_fov = 1.0f;
@@ -87,38 +81,42 @@ void FpsCamera::ProcessSrollInput(float definedXOffset, float definedYOffset)
         m_fov = 65.0f;
 }
 
-glm::mat4 FpsCamera::GetViewMatrix() const
-{
+glm::mat4 FpsCamera::GetViewMatrix() const {
     return glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 }
 
-glm::mat4 FpsCamera::GetProjectionMatrix(glm::vec2 viewportSize) const
-{
-    return glm::perspective(glm::radians(m_fov),
-                            viewportSize.x / viewportSize.y, 0.1f, 260.0f);
+glm::mat4 FpsCamera::GetProjectionMatrix(glm::vec2 viewportSize) const {
+    return glm::perspective(glm::radians(m_fov), viewportSize.x / viewportSize.y, 0.1f, 260.0f);
 }
 
-glm::vec3 FpsCamera::GetCameraPosition() const { return m_cameraPos; }
+glm::vec3 FpsCamera::GetCameraPosition() const {
+    return m_cameraPos;
+}
 
-void FpsCamera::SetCameraMovementSpeed(float movementSpeed)
-{
+void FpsCamera::SetCameraMovementSpeed(float movementSpeed) {
     m_movementSpeed = movementSpeed;
 }
 
-void FpsCamera::SetCameraFov(float fov) { m_fov = fov; }
+void FpsCamera::SetCameraFov(float fov) {
+    m_fov = fov;
+}
 
-void FpsCamera::SetCameraSensitivity(float sensitivity)
-{
+void FpsCamera::SetCameraSensitivity(float sensitivity) {
     m_sensitivity = sensitivity;
 }
 
-void FpsCamera::SetCameraPosition(glm::vec3 position)
-{
+void FpsCamera::SetCameraPosition(glm::vec3 position) {
     m_cameraPos = position;
 }
 
-float FpsCamera::GetFov() const { return m_fov; }
+float FpsCamera::GetFov() const {
+    return m_fov;
+}
 
-float FpsCamera::GetSensitivity() const { return m_sensitivity; }
+float FpsCamera::GetSensitivity() const {
+    return m_sensitivity;
+}
 
-float FpsCamera::GetMovementSpeed() const { return m_movementSpeed; }
+float FpsCamera::GetMovementSpeed() const {
+    return m_movementSpeed;
+}

@@ -11,8 +11,7 @@
 
 #include "../Tools/Log.hpp"
 
-class Shader
-{
+class Shader {
   private:
     std::string m_vertexShaderPath;
     std::string m_fragmentShaderPath;
@@ -23,10 +22,10 @@ class Shader
     std::string m_fragmentShaderCode;
 
     void ParseAndCreateShaders();
-    uint32_t CompileShader(uint32_t type, const std::string &src);
+    uint32_t CompileShader(uint32_t type, const std::string& src);
 
   public:
-    Shader(const char *fragmentShaderPath, const char *vertexShaderPath);
+    Shader(const char* fragmentShaderPath, const char* vertexShaderPath);
     ~Shader();
     uint32_t GetShaderProgram();
     void SetUniform(std::string uniformName, int uniformData);
@@ -38,5 +37,5 @@ class Shader
     void SetUniform(std::string uniformName, glm::vec3 uniformData);
     void SetUniform(std::string uniformName, glm::vec4 uniformData);
     void Bind();
-    friend std::ostream &operator<<(std::ostream &os, const Shader &sh);
+    friend std::ostream& operator<<(std::ostream& os, const Shader& sh);
 };

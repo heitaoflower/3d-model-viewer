@@ -7,12 +7,10 @@
 #include "OpenglAPI.hpp"
 #include "OpenglData.hpp"
 
-class Core
-{
+class Core {
   private:
     static glm::vec3 s_backgroundColor;
-    static GLuint
-        s_render_target_texture; // Tektura, do které se vyrenderuje scéna
+    static GLuint s_render_target_texture;     // Tektura, do které se vyrenderuje scéna
     static GLuint s_render_target_framebuffer; // Framebuffer, do kterého se
                                                // vyrenderuje scéna
     static GLuint s_render_target_depthbuffer; // Depthbuffer, do kterého se
@@ -29,7 +27,7 @@ class Core
     static void OnRenderEnd();
     static void UpdateVariables();
     static void ClearBuffers(bool whiteBackground = false);
-    static void SetBackgroundColor(const glm::vec3 &color);
+    static void SetBackgroundColor(const glm::vec3& color);
     static GLuint GetRenderTargetTexture();
     static GLuint GetRenderTargetFramebuffer();
 };

@@ -4,23 +4,19 @@
 #include <fstream>
 #include <iostream>
 
-class Log
-{
-  private:
-    uint32_t errorCount, warningCount;
-
+class Log {
   public:
-    template<typename... Args>
+    template <typename... Args>
     static void Error(Args... args) {
         (std::cout << ... << args) << std::endl;
     }
 
-    template<typename... Args>
+    template <typename... Args>
     static void Warn(Args... args) {
         (std::cout << ... << args) << std::endl;
     }
 
-    template<typename... Args>
+    template <typename... Args>
     static void Info(Args... args) {
         (std::cout << ... << args) << std::endl;
     }

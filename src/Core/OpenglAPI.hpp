@@ -4,8 +4,7 @@
 #include "GLFW/glfw3.h"
 #include <stdint.h>
 
-class OpenglAPI
-{
+class OpenglAPI {
   public:
     OpenglAPI() = delete;
     static bool InitOpenglAPI();

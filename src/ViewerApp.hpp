@@ -10,17 +10,15 @@
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
 
-class ViewerApp
-{
+class ViewerApp {
   public:
     ViewerApp() = default;
     ~ViewerApp() = default;
 
-    void Run(const std::string &initialModelPath);
+    void Run(const std::string& initialModelPath);
 };
 
-inline void ViewerApp::Run(const std::string &initialModelPath)
-{
+inline void ViewerApp::Run(const std::string& initialModelPath) {
     std::string modelPath = initialModelPath;
     Window::InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "3D Model Viewer");
     Window::SetVsync(true);
@@ -31,11 +29,9 @@ inline void ViewerApp::Run(const std::string &initialModelPath)
 
     ModelLoader modelLoader;
 
-    while (!Window::WindowShouldClose())
-    {
+    while (!Window::WindowShouldClose()) {
         auto inputData = windowsSystem.GetInputData();
-        if (modelPath.size() > 0)
-        {
+        if (modelPath.size() > 0) {
             WindowSystem::s_modelPath = std::filesystem::path(initialModelPath);
             modelPath.clear();
         }
@@ -43,14 +39,11 @@ inline void ViewerApp::Run(const std::string &initialModelPath)
         Core::OnRenderStart();
         Core::StartRenderingToTexture(windowsSystem.GetViewportWinSize());
         CameraSystem::GetInstance().UpdateInput();
-        CameraSystem::GetInstance().SetInputState(
-            inputData.GetAllowCameraInput());
+        CameraSystem::GetInstance().SetInputState(inputData.GetAllowCameraInput());
         modelLoader.LoadSelectedModel();
         modelLoader.RenderSelectedModel(inputData);
-        Renderer::GetInstance().SetLightShaderActive(
-            inputData.GetIsLightShaderActive());
-        Renderer::GetInstance().SetLightIntensity(
-            inputData.GetLightIntensity());
+        Renderer::GetInstance().SetLightShaderActive(inputData.GetIsLightShaderActive());
+        Renderer::GetInstance().SetLightIntensity(inputData.GetLightIntensity());
         Renderer::GetInstance().SetWireframeMode(inputData.GetWireframeMode());
         windowsSystem.ApplyGuiData();
         PerfData::CollectPerformanceData();

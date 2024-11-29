@@ -3,18 +3,18 @@
 #include "../GUI/WindowSystem.hpp"
 #include "Model.hpp"
 
-class Renderer
-{
+class Renderer {
   public:
-    const void RenderModel(const Model &model, const InputData &inputData);
-    static Renderer &GetInstance();
-    const uint32_t GetVerticesCount() const;
-    const uint32_t GetIndicesCount() const;
+    const void RenderModel(const Model& model, const InputData& inputData);
+    static Renderer& GetInstance();
+    [[nodiscard]] uint32_t GetVerticesCount() const;
+    [[nodiscard]] uint32_t GetIndicesCount() const;
     void ReloadShaders();
-    Shader &GetShader();
+    Shader& GetShader();
     void SetLightShaderActive(bool active);
     void SetLightIntensity(float intensity);
     void SetWireframeMode(bool active);
+
   private:
     uint32_t m_verticesCount;
     uint32_t m_indicesCount;

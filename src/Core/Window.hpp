@@ -10,46 +10,43 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-struct Display
-{
+struct Display {
     uint32_t screenHeight;
     uint32_t screenWidth;
 };
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-void mouse_button_callback(GLFWwindow *window, int button, int action,
-                           int mods);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
-class Window
-{
+class Window {
   private:
     static bool s_Vsync;
-    static Display *s_display;
+    static Display* s_display;
     static uint32_t s_windowHeight;
     static uint32_t s_windowWidth;
     static bool s_isCursorVisible;
     static bool s_isFullscreenEnabled;
-    static GLFWwindow *s_window;
+    static GLFWwindow* s_window;
 
   protected:
     static void OnRenderStart();
     static void OnRenderEnd();
 
   public:
-    Window(const Window &) = delete;
+    Window(const Window&) = delete;
     Window() = delete;
     ~Window() = delete;
 
     static bool InitWindow(const uint32_t screenWidth,
                            const uint32_t screenHeight,
-                           const std::string &windowTitle);
+                           const std::string& windowTitle);
     static void DestroyWindow();
-    static void ChangeWindowTitle(const std::string &windowTitle);
+    static void ChangeWindowTitle(const std::string& windowTitle);
     static int WindowShouldClose();
     // Settery
     static void SetFullscreen();
@@ -62,7 +59,7 @@ class Window
     static const int GetWindowWidth();
     static const int GetWindowHeight();
     static const bool GetCursorVisibility();
-    static GLFWwindow *GetGLFWwindowRef();
+    static GLFWwindow* GetGLFWwindowRef();
 
     friend class Core;
 };

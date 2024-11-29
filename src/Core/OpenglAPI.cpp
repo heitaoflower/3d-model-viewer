@@ -3,11 +3,9 @@
 uint32_t OpenglAPI::m_drawCallsCount = 0;
 uint32_t OpenglAPI::m_drawCallsCountValue = OpenglAPI::m_drawCallsCount;
 
-bool OpenglAPI::InitOpenglAPI()
-{
+bool OpenglAPI::InitOpenglAPI() {
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         Log::Error("OpenglAPI (Glad) se nespustil!");
         return false;
     }
@@ -15,22 +13,22 @@ bool OpenglAPI::InitOpenglAPI()
         return true;
 }
 
-void OpenglAPI::DrawArrays(GLenum mode, GLenum verticesCount)
-{
+void OpenglAPI::DrawArrays(GLenum mode, GLenum verticesCount) {
     OpenglAPI::m_drawCallsCount++;
     glDrawArrays(mode, 0, verticesCount);
 }
 
-void OpenglAPI::DrawElements(GLenum mode, GLenum indicesCount)
-{
+void OpenglAPI::DrawElements(GLenum mode, GLenum indicesCount) {
     OpenglAPI::m_drawCallsCount++;
     glDrawElements(mode, indicesCount, GL_UNSIGNED_INT, nullptr);
 }
 
-void OpenglAPI::OnRenderEnd()
-{
+void OpenglAPI::OnRenderEnd() {
+
     OpenglAPI::m_drawCallsCountValue = OpenglAPI::m_drawCallsCount;
     OpenglAPI::m_drawCallsCount = 0;
 }
 
-uint32_t OpenglAPI::GetDrawCallsCount() { return m_drawCallsCountValue; }
+uint32_t OpenglAPI::GetDrawCallsCount() {
+    return m_drawCallsCountValue;
+}

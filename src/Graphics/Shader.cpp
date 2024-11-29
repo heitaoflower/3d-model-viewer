@@ -1,24 +1,23 @@
 ﻿#include "Shader.hpp"
 
-Shader::Shader(const char *fragmentShaderPath, const char *vertexShaderPath)
-{
+Shader::Shader(const char* fragmentShaderPath, const char* vertexShaderPath) {
     m_vertexShaderPath = vertexShaderPath;
     m_fragmentShaderPath = fragmentShaderPath;
     Shader::ParseAndCreateShaders();
 }
 
-Shader::~Shader() { glDeleteProgram(m_shaderProgram); }
+Shader::~Shader() {
+    glDeleteProgram(m_shaderProgram);
+}
 
 // Shadery se načtou ze souborů, potom se zkompilují a nalinkují
-void Shader::ParseAndCreateShaders()
-{
+void Shader::ParseAndCreateShaders() {
     std::ifstream fragShaderFile;
     std::ifstream vertShaderFile;
 
     fragShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     vertShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try
-    {
+    try {
         fragShaderFile.open(m_fragmentShaderPath);
         vertShaderFile.open(m_vertexShaderPath);
 
@@ -34,13 +33,12 @@ void Shader::ParseAndCreateShaders()
         m_vertexShaderCode = vertexShaderCodeStream.str();
         m_fragmentShaderCode = fragmentShaderCodeStream.str();
 
-        Log::Info("Shadery: " + m_fragmentShaderPath + ' ' +
-                     m_vertexShaderPath + " uspesne nacteny!");
+        Log::Info("Shadery: " + m_fragmentShaderPath + ' ' + m_vertexShaderPath
+                  + " uspesne nacteny!");
     }
-    catch (std::ifstream::failure &e)
-    {
-        Log::Error("Shader: " + m_fragmentShaderPath + ' ' +
-                      m_vertexShaderPath + " " + std::string(e.what()));
+    catch (std::ifstream::failure& e) {
+        Log::Error("Shader: " + m_fragmentShaderPath + ' ' + m_vertexShaderPath + " "
+                   + std::string(e.what()));
         throw e;
         return;
     }
@@ -58,10 +56,9 @@ void Shader::ParseAndCreateShaders()
     glDeleteShader(fs);
 }
 
-uint32_t Shader::CompileShader(uint32_t type, const std::string &shaderPath)
-{
+uint32_t Shader::CompileShader(uint32_t type, const std::string& shaderPath) {
     uint32_t id = glCreateShader(type);
-    const char *src = shaderPath.c_str();
+    const char* src = shaderPath.c_str();
 
     glShaderSource(id, 1, &src, NULL);
     glCompileShader(id);
@@ -69,11 +66,10 @@ uint32_t Shader::CompileShader(uint32_t type, const std::string &shaderPath)
     int result;
     glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 
-    if (!result)
-    {
+    if (!result) {
         int length;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char *message = new char[length];
+        char* message = new char[length];
         glGetShaderInfoLog(id, length, &length, message);
         Log::Error("Shader: compilation failed!" + std::string(message));
 
@@ -84,71 +80,60 @@ uint32_t Shader::CompileShader(uint32_t type, const std::string &shaderPath)
     return id;
 }
 
-uint32_t Shader::GetShaderProgram() { return m_shaderProgram; }
-
-// Nastavování veškerých uniformů
-void Shader::SetUniform(std::string uniformName, int uniformData)
-{
-    glUseProgram(m_shaderProgram);
-    glUniform1i(glGetUniformLocation(m_shaderProgram, uniformName.c_str()),
-                uniformData);
+uint32_t Shader::GetShaderProgram() {
+    return m_shaderProgram;
 }
 
-void Shader::SetUniform(std::string uniformName, uint32_t uniformData)
-{
+void Shader::SetUniform(std::string uniformName, int uniformData) {
     glUseProgram(m_shaderProgram);
-    glUniform1ui(glGetUniformLocation(m_shaderProgram, uniformName.c_str()),
-                 uniformData);
+    glUniform1i(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
 }
 
-void Shader::SetUniform(std::string uniformName, glm::mat4 uniformData)
-{
+void Shader::SetUniform(std::string uniformName, uint32_t uniformData) {
+    glUseProgram(m_shaderProgram);
+    glUniform1ui(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
+}
+
+void Shader::SetUniform(std::string uniformName, glm::mat4 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
     glUniformMatrix4fv(uLoc, 1, GL_FALSE, glm::value_ptr(uniformData));
 }
 
-void Shader::SetUniform(std::string uniformName, glm::vec3 uniformData)
-{
+void Shader::SetUniform(std::string uniformName, glm::vec3 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
     glUniform3f(uLoc, uniformData.x, uniformData.y, uniformData.z);
 }
 
-void Shader::SetUniform(std::string uniformName, glm::vec2 uniformData)
-{
+void Shader::SetUniform(std::string uniformName, glm::vec2 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
     glUniform2f(uLoc, uniformData.x, uniformData.y);
 }
 
-void Shader::SetUniform(std::string uniformName, glm::vec4 uniformData)
-{
+void Shader::SetUniform(std::string uniformName, glm::vec4 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
-    glUniform4f(uLoc, uniformData.x, uniformData.y, uniformData.z,
-                uniformData.w);
+    glUniform4f(uLoc, uniformData.x, uniformData.y, uniformData.z, uniformData.w);
 }
 
-void Shader::SetUniform(std::string uniformName, bool uniformData)
-{
+void Shader::SetUniform(std::string uniformName, bool uniformData) {
     glUseProgram(m_shaderProgram);
-    glUniform1i(glGetUniformLocation(m_shaderProgram, uniformName.c_str()),
-                uniformData);
+    glUniform1i(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
 }
 
-void Shader::SetUniform(std::string uniformName, float uniformData)
-{
+void Shader::SetUniform(std::string uniformName, float uniformData) {
     glUseProgram(m_shaderProgram);
-    glUniform1f(glGetUniformLocation(m_shaderProgram, uniformName.c_str()),
-                uniformData);
+    glUniform1f(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
 }
 
-void Shader::Bind() { glUseProgram(m_shaderProgram); }
+void Shader::Bind() {
+    glUseProgram(m_shaderProgram);
+}
 
 // Přetížení << pro výpis kódu shaderu pro debugování
-std::ostream &operator<<(std::ostream &os, const Shader &sh)
-{
+std::ostream& operator<<(std::ostream& os, const Shader& sh) {
     os << std::endl;
     os << "/Begin of Vertex Shader Code/"
        << "\n"

@@ -8,10 +8,9 @@
 #include <glm/glm.hpp>
 #include <string>
 
-class ImguiRendering
-{
+class ImguiRendering {
   public:
-    static void InitImgui(GLFWwindow *window);
+    static void InitImgui(GLFWwindow* window);
     static void OnRenderEnd();
     static void ShutdownImguiRendering();
     static void UpdateImgui();

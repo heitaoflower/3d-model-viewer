@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "../Core/Window.hpp"
 
-class PerfData
-{
+class PerfData {
   private:
     static float s_fps;
     static float s_lastFrame;

@@ -1,25 +1,20 @@
 ﻿#include "GLDebug.hpp"
 
-void GLDebug::EnableDebugMode()
-{
+void GLDebug::EnableDebugMode() {
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // SynchronnĂ­ vĂ˝stup
     glDebugMessageCallback(glDebugOutput, nullptr);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr,
-                          GL_TRUE);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
     Log::Warn("OpenGL Debug mode je Aktivni!");
 }
 
-GLenum GLDebug::CheckForError_(const char *file, int line)
-{
+GLenum GLDebug::CheckForError_(const char* file, int line) {
     GLenum errorCode = glGetError();
     std::string errorMessage;
-    while (errorCode != GL_NO_ERROR)
-    {
-        switch (errorCode)
-        {
+    while (errorCode != GL_NO_ERROR) {
+        switch (errorCode) {
         case GL_INVALID_ENUM:
             errorMessage = "INVALID_ENUM";
             break;
@@ -42,9 +37,8 @@ GLenum GLDebug::CheckForError_(const char *file, int line)
             errorMessage = "INVALID_FRAMEBUFFER_OPERATION";
             break;
         }
-        Log::Error(std::string(file) + " (" + std::to_string(line) + ") " +
-                      "-> " + errorMessage + " (" + std::to_string(errorCode) +
-                      ")");
+        Log::Error(std::string(file) + " (" + std::to_string(line) + ") " + "-> " + errorMessage
+                   + " (" + std::to_string(errorCode) + ")");
     }
 
     std::cout << std::endl;
@@ -52,10 +46,13 @@ GLenum GLDebug::CheckForError_(const char *file, int line)
     return errorCode;
 }
 
-void APIENTRY glDebugOutput(GLenum source, GLenum type, uint32_t id,
-                            GLenum severity, GLsizei length,
-                            const char *message, const void *userParam)
-{
+void APIENTRY glDebugOutput(GLenum source,
+                            GLenum type,
+                            uint32_t id,
+                            GLenum severity,
+                            GLsizei length,
+                            const char* message,
+                            const void* userParam) {
 
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
         return;
@@ -63,8 +60,7 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, uint32_t id,
     std::cout << "---------------" << std::endl;
     std::cout << "Debug message (" << id << "): " << message << std::endl;
 
-    switch (source)
-    {
+    switch (source) {
     case GL_DEBUG_SOURCE_API:
         std::cout << "Source: API";
         break;
@@ -86,8 +82,7 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, uint32_t id,
     }
     std::cout << std::endl;
 
-    switch (type)
-    {
+    switch (type) {
     case GL_DEBUG_TYPE_ERROR:
         std::cout << "Type: Error";
         break;
@@ -118,8 +113,7 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, uint32_t id,
     }
     std::cout << std::endl;
 
-    switch (severity)
-    {
+    switch (severity) {
     case GL_DEBUG_SEVERITY_HIGH:
         std::cout << "Severity: high";
         break;

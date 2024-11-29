@@ -4,24 +4,21 @@
 #include "../Graphics/Renderer.hpp"
 #include <filesystem>
 
-enum USER_INPUT
-{
+enum USER_INPUT {
     TEXTURE_SELECTION,
     COLOR_SELECTION,
     NO_INPUT
 };
 
-enum MODEL_EXPORT_TYPE
-{
-  OBJ,
-  GLTF,
-  FBX,
+enum MODEL_EXPORT_TYPE {
+    OBJ,
+    GLTF,
+    FBX,
 };
 
 std::string getExportTypeString(MODEL_EXPORT_TYPE exportType);
 
-class ModelLoader
-{
+class ModelLoader {
   private:
     std::unique_ptr<Model> m_model;
     uint32_t m_texture;
@@ -35,6 +32,5 @@ class ModelLoader
     void LoadSelectedModel();
     void RenderSelectedModel(InputData inputData);
     bool IsModelLoaded();
-    const std::vector<std::string>
-    FindTexture(const std::string modelPath) const;
+    const std::vector<std::string> FindTexture(const std::string modelPath) const;
 };

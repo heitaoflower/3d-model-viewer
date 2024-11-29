@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "../Graphics/Shader.hpp"
 
-class OpenglData
-{
+class OpenglData {
   private:
     static bool s_depthTest;
     static bool s_stenctilTest;
@@ -13,8 +12,7 @@ class OpenglData
   public:
     static void SetBlending(bool value);
     static void SetDepthTesting(bool value);
-    static void SetFaceCulling(bool value, bool front = false,
-                               int fronFace = GL_CCW);
+    static void SetFaceCulling(bool value, bool front = false, int fronFace = GL_CCW);
     static void SetStencilTesting(bool value);
     static void SetColorBuffer(bool value);
     static void SetPolygonMode(int mode);

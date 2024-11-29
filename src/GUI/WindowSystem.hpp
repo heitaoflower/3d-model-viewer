@@ -10,8 +10,7 @@
 #include <vector>
 #include "../constants.hpp"
 
-struct InputData
-{
+struct InputData {
   private:
     glm::vec3 m_modelPos;
     glm::vec3 m_modelRot;
@@ -22,28 +21,33 @@ struct InputData
     float m_lightIntensity;
     bool m_wireframeMode;
     glm::mat4 model;
+    float m_materialShininess;
+    glm::vec3 m_lightPos;
 
   public:
-    InputData(glm::vec3 modelPos, glm::vec3 modelRot, glm::vec3 modelScale,
-              float modelRotAngle, bool allowCameraInput);
-    const glm::mat4 GetModelMatrix() const;
-    const bool GetAllowCameraInput() const;
-    const bool GetIsLightShaderActive() const;
-    const float GetLightIntensity() const;
-    const bool GetWireframeMode() const;
+    InputData(glm::vec3 modelPos,
+              glm::vec3 modelRot,
+              glm::vec3 modelScale,
+              float modelRotAngle,
+              bool allowCameraInput);
+    [[nodiscard]] const glm::mat4 GetModelMatrix() const;
+    [[nodiscard]] bool GetAllowCameraInput() const;
+    [[nodiscard]] bool GetIsLightShaderActive() const;
+    [[nodiscard]] float GetLightIntensity() const;
+    [[nodiscard]] bool GetWireframeMode() const;
+    [[nodiscard]] glm::vec3 GetLightPos() const;
+    [[nodiscard]] float GetMaterialShininess() const;
     friend class WindowSystem;
 };
 
-struct CameraSettings
-{
+struct CameraSettings {
     int cameraType;
     int projectionType;
     float zoomMultiplier;
     CameraSettings() noexcept;
 };
 
-class WindowSystem
-{
+class WindowSystem {
   public:
     WindowSystem();
     void RenderWindows(bool isObjectRendered);
@@ -52,8 +56,7 @@ class WindowSystem
     static const glm::vec2 GetViewportWinSize();
     static std::optional<std::filesystem::path> s_modelPath;
     static bool s_flipTexture;
-    static const std::optional<std::string>
-    RenderTexturesDialog(std::vector<std::string> textures);
+    static const std::optional<std::string> RenderTexturesDialog(std::vector<std::string> textures);
     static const std::optional<glm::vec3> RenderModelColorPicker();
 
   private:
