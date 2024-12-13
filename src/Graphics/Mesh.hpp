@@ -37,6 +37,6 @@ class Mesh {
          std::vector<unsigned int> indices,
          std::vector<MeshData::Texture> textures);
 
-    void DrawArrays(Shader& shader, bool manualySetTextures) const;
+    void DrawArrays() const;
     void Destroy();
 };

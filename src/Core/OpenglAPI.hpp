@@ -2,7 +2,7 @@
 #include "../Tools/Log.hpp"
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
-#include <stdint.h>
+#include <cstdint>
 
 class OpenglAPI {
   public:

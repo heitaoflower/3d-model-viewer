@@ -55,10 +55,10 @@ class Window {
     static void SetWindowSize(uint32_t windowWidth, uint32_t windowHeight);
     static void SetCursorVisible(bool visible);
     // Gettery
-    static const bool GetVsyncBool();
-    static const int GetWindowWidth();
-    static const int GetWindowHeight();
-    static const bool GetCursorVisibility();
+    static bool GetVsyncBool();
+    static int GetWindowWidth();
+    static int GetWindowHeight();
+    static bool GetCursorVisibility();
     static GLFWwindow* GetGLFWwindowRef();
 
     friend class Core;

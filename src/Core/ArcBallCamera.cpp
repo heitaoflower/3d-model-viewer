@@ -1,12 +1,13 @@
 ﻿#include "ArcBallCamera.hpp"
+
+#include <cmath>
 #include "glm/ext/scalar_constants.hpp"
 
 ArcBallCamera::ArcBallCamera()
-    : m_fov(45.0f)
+    : m_isOrtho(false)
+    , m_fov(45.0f)
     , m_near(0.1f)
     , m_far(500.0f)
-    , m_isOrtho(false)
-    , m_firstMouse(true)
     , m_sensitivity(0.05)
     , m_center(glm::vec3(2.0f, 0.0f, -5.0f))
     , m_upVector(glm::vec3(0.0f, 1.0f, 0.0f))
@@ -14,23 +15,22 @@ ArcBallCamera::ArcBallCamera()
     , m_minRadius(2)
     , m_azimuthAngle(0)
     , m_polarAngle(0)
+    , m_firstMouse(true)
     , m_lastXPos(0)
     , m_lastYPos(0)
     , m_rotationSpeed(0.01f) {}
 
-ArcBallCamera::~ArcBallCamera() {}
-
-void ArcBallCamera::SetFov(const float fov, const glm::vec2 viewportSize) {
+void ArcBallCamera::SetFov(const float fov) {
     m_fov = fov;
     m_projectionMatrix = std::nullopt;
 }
 
-void ArcBallCamera::SetNear(const float near, const glm::vec2 viewportSize) {
+void ArcBallCamera::SetNear(const float near) {
     m_near = near;
     m_projectionMatrix = std::nullopt;
 }
 
-void ArcBallCamera::SetFar(const float far, const glm::vec2 viewportSize) {
+void ArcBallCamera::SetFar(const float far) {
     m_far = far;
     m_projectionMatrix = std::nullopt;
 }
@@ -74,7 +74,7 @@ void ArcBallCamera::RotateAzimuth(const float radians) {
     m_azimuthAngle += radians;
 
     const auto fullCircle = 2.0f * glm::pi<double>();
-    m_azimuthAngle = fmodf(m_azimuthAngle, fullCircle);
+    m_azimuthAngle = fmodf(m_azimuthAngle, static_cast<int32_t>(fullCircle));
     if (m_azimuthAngle < 0.0f) {
         m_azimuthAngle = fullCircle + m_azimuthAngle;
     }
@@ -101,10 +101,10 @@ void ArcBallCamera::RotatePolar(const float radians) {
 }
 
 const glm::mat4 ArcBallCamera::GetViewMatrix() const {
-    const auto sineAzimuth = sin(m_azimuthAngle);
-    const auto cosineAzimuth = cos(m_azimuthAngle);
-    const auto sinePolar = sin(m_polarAngle);
-    const auto cosinePolar = cos(m_polarAngle);
+    const auto sineAzimuth = std::sin(m_azimuthAngle);
+    const auto cosineAzimuth = std::cos(m_azimuthAngle);
+    const auto sinePolar = std::sin(m_polarAngle);
+    const auto cosinePolar = std::cos(m_polarAngle);
 
     const auto x = m_center.x + m_radius * cosinePolar * cosineAzimuth;
     const auto y = m_center.y + m_radius * sinePolar;
@@ -131,7 +131,7 @@ void ArcBallCamera::SetProjMatToOrtho() {
     m_projectionMatrix = std::nullopt;
 }
 
-void ArcBallCamera::SetProjMatToPerspective(const glm::vec2 viewportSize) {
+void ArcBallCamera::SetProjMatToPerspective(const glm::vec2  /*viewportSize*/) {
     m_isOrtho = false;
     m_projectionMatrix = std::nullopt;
 }

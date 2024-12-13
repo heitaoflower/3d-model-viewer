@@ -36,12 +36,15 @@ GLenum GLDebug::CheckForError_(const char* file, int line) {
         case GL_INVALID_FRAMEBUFFER_OPERATION:
             errorMessage = "INVALID_FRAMEBUFFER_OPERATION";
             break;
+        default:
+            errorMessage = "UNKNOWN";
+            break;
         }
         Log::Error(std::string(file) + " (" + std::to_string(line) + ") " + "-> " + errorMessage
                    + " (" + std::to_string(errorCode) + ")");
     }
 
-    std::cout << std::endl;
+    std::cout << '\n';
 
     return errorCode;
 }
@@ -50,15 +53,15 @@ void APIENTRY glDebugOutput(GLenum source,
                             GLenum type,
                             uint32_t id,
                             GLenum severity,
-                            GLsizei length,
+                            GLsizei /*length*/,
                             const char* message,
-                            const void* userParam) {
+                            const void* /*userParam*/) {
 
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
         return;
 
-    std::cout << "---------------" << std::endl;
-    std::cout << "Debug message (" << id << "): " << message << std::endl;
+    std::cout << "---------------" << '\n';
+    std::cout << "Debug message (" << id << "): " << message << '\n';
 
     switch (source) {
     case GL_DEBUG_SOURCE_API:
@@ -79,8 +82,10 @@ void APIENTRY glDebugOutput(GLenum source,
     case GL_DEBUG_SOURCE_OTHER:
         std::cout << "Source: Other";
         break;
+    default:
+        std::cout << "Source: Unknown";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
 
     switch (type) {
     case GL_DEBUG_TYPE_ERROR:
@@ -110,8 +115,11 @@ void APIENTRY glDebugOutput(GLenum source,
     case GL_DEBUG_TYPE_OTHER:
         std::cout << "Type: Other";
         break;
+    default:
+        std::cout << "Type: Unknown";
+        break;
     }
-    std::cout << std::endl;
+    std::cout << '\n';
 
     switch (severity) {
     case GL_DEBUG_SEVERITY_HIGH:
@@ -126,7 +134,10 @@ void APIENTRY glDebugOutput(GLenum source,
     case GL_DEBUG_SEVERITY_NOTIFICATION:
         std::cout << "Severity: notification";
         break;
+    default:
+        std::cout << "Severity: unknown";
+        break;
     }
-    std::cout << std::endl;
-    std::cout << std::endl;
+    std::cout << '\n';
+    std::cout << '\n';
 }

@@ -56,7 +56,7 @@ class WindowSystem {
     static const glm::vec2 GetViewportWinSize();
     static std::optional<std::filesystem::path> s_modelPath;
     static bool s_flipTexture;
-    static const std::optional<std::string> RenderTexturesDialog(std::vector<std::string> textures);
+    static const std::optional<std::string> RenderTexturesDialog(std::vector<std::string>& textures);
     static const std::optional<glm::vec3> RenderModelColorPicker();
 
   private:

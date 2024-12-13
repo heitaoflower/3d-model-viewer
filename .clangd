@@ -1,0 +1,30 @@
+CompileFlags:
+  Add: [-std=c++20, -Wall, -Wextra, -Wno-unused-include -Wno-deprecated-copy-with-user-provided-dtor]
+Diagnostics:
+  UnusedIncludes: None 
+  ClangTidy:
+    Add: [
+      bugprone*,
+      misc*,
+      modernize*,
+      performance*,
+      portability*]
+    Remove: [
+      performance-no-int-to-ptr,
+      misc-no-recursion,
+      bugprone-narrowing-conversions,
+      misc-use-internal-linkage,
+      bugprone-easily-swappable-parameters,
+      modernize-use-trailing-return-type,
+      readability-magic-numbers,
+      readability-implicit-bool-conversion,
+      readability-named-parameter,
+      readability-redundant-member-init,
+      readability-qualified-auto,
+      readability-redundant-preprocessor,
+      readability-identifier-naming,
+      modernize-avoid-c-arrays,
+      modernize-use-trailing-return-type,
+      modernize-use-ranges,
+      misc-non-private-member-variables-in-classes]
+ 

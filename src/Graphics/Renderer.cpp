@@ -5,7 +5,7 @@ Renderer& Renderer::GetInstance() {
     return instance;
 }
 
-const void Renderer::RenderModel(const Model& model, const InputData& inputData) {
+void Renderer::RenderModel(const Model& model, const InputData& inputData) {
     auto modelMatrix = inputData.GetModelMatrix();
 
     m_indicesCount = model.GetIndicesCount();
@@ -28,7 +28,7 @@ const void Renderer::RenderModel(const Model& model, const InputData& inputData)
         m_simpleShader.SetUniform("color", model.GetColor());
     }
 
-    model.DrawArrays(m_lightShaderIsActive ? m_lightShader : m_simpleShader);
+    model.DrawArrays();
 }
 
 uint32_t Renderer::GetVerticesCount() const {
@@ -53,8 +53,11 @@ void Renderer::SetWireframeMode(bool active) {
 }
 
 Renderer::Renderer()
-    : m_indicesCount(0)
-    , m_verticesCount(0)
+    : m_verticesCount(0)
+    , m_indicesCount(0)
+    , m_lightShaderIsActive(true)
+    , m_lightIntensity(1.0f)
+    , m_wireframeMode(false)
     , m_lightShader(
           (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/light.frag.glsl")
               .c_str(),
@@ -64,10 +67,7 @@ Renderer::Renderer()
           (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/simple.frag.glsl")
               .c_str(),
           (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/simple.vert.glsl")
-              .c_str())
-    , m_lightShaderIsActive(true)
-    , m_lightIntensity(1.0f)
-    , m_wireframeMode(false) {}
+              .c_str()) {}
 
 Shader& Renderer::GetShader() {
     return m_lightShader;

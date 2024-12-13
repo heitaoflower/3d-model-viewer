@@ -86,7 +86,7 @@ set_target_properties(assimp PROPERTIES COMPILE_FLAGS "-w")
 file(GLOB_RECURSE SOURCES "src/*.hpp" "src/*.cpp" "src/*.h")
 
 add_executable(3DViewer ${SOURCES})
-target_compile_options(3DViewer PRIVATE -Wall -Wextra -Wno-unused-include -Wno-deprecated-copy-with-user-provided-dtor)
+target_compile_options(3DViewer PRIVATE -Wall -Wno-narrowing -Wextra -Wno-deprecated-copy-with-user-provided-dtor)
 if(WIN32) # Pokud je operační systém Windows
     set(CMAKE_C_COMPILER "cl")
     set(CMAKE_CXX_COMPILER "cl")

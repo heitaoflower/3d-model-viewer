@@ -3,6 +3,7 @@
 #include "ImGuizmo.h"
 #include "imgui.h"
 #include "GuiStyle.hpp"
+#include <ranges>
 
 glm::vec2 WindowSystem::s_viewportWinSize = glm::vec2(-1.0f);
 std::optional<std::filesystem::path> WindowSystem::s_modelPath = std::nullopt;
@@ -94,32 +95,32 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
         s_viewportWinSize = glm::vec2((uint16_t)winSize.x, (uint16_t)winSize.y);
 
     if (isObjectRendered)
-        ImGui::Image((void*)(intptr_t)Core::GetRenderTargetTexture(),
+        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(Core::GetRenderTargetTexture())),
                      ImVec2(s_viewportWinSize.x, s_viewportWinSize.y));
     else {
         float windowWidth = ImGui::GetWindowSize().x;
         float windowHeight = ImGui::GetWindowSize().y;
 
-        float textWidth = ImGui::CalcTextSize(u8"Není načtený žádný model").x;
-        float textHeight = ImGui::CalcTextSize(u8"Není načtený žádný model").y;
+        float textWidth = ImGui::CalcTextSize("Není načtený žádný model").x;
+        float textHeight = ImGui::CalcTextSize("Není načtený žádný model").y;
 
         ImGui::SetCursorPos(
             ImVec2((windowWidth - textWidth) / 2.0f, (windowHeight - textHeight) / 2.0f - 60.f));
-        ImGui::Text(u8"Není načtený žádný model");
+        ImGui::Text("Není načtený žádný model");
 
-        textWidth = ImGui::CalcTextSize(u8"Otevřete model pomocí menu Soubor -> Otevřít").x;
-        textHeight = ImGui::CalcTextSize(u8"Otevřete model pomocí menu Soubor -> Otevřít").y;
+        textWidth = ImGui::CalcTextSize("Otevřete model pomocí menu Soubor -> Otevřít").x;
+        textHeight = ImGui::CalcTextSize("Otevřete model pomocí menu Soubor -> Otevřít").y;
 
         ImGui::SetCursorPos(
             ImVec2((windowWidth - textWidth) / 2.0f, (windowHeight - textHeight) / 2.0f - 30.f));
-        ImGui::Text(u8"Otevřete model pomocí menu Soubor -> Otevřít");
+        ImGui::Text("Otevřete model pomocí menu Soubor -> Otevřít");
 
         ImGui::Dummy(ImVec2(0, 10));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(0, 10));
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30, 10));
         ImGui::SetCursorPosX((windowWidth - 120) / 2.0f);
-        if (ImGui::Button(u8"Načíst model", ImVec2(150, 50))) {
+        if (ImGui::Button("Načíst model", ImVec2(150, 50))) {
             OpenModelSelectionDialog();
         }
         ImGui::PopStyleVar();
@@ -159,7 +160,7 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
 
     RenderClearColorPicker();
     RenderModelInfo();
-    ImGui::Checkbox(u8"Wireframe", &m_inputData.m_wireframeMode);
+    ImGui::Checkbox("Wireframe", &m_inputData.m_wireframeMode);
     ImGui::Separator();
     if (m_renderGizmo)
         ImGui::BeginDisabled();
@@ -239,15 +240,15 @@ void WindowSystem::RenderTextureErrorWindow() {
 }
 
 void WindowSystem::RenderShaderSettings() {
-    ImGui::Text(u8"Nastavení shaderu");
-    ImGui::Checkbox(u8"Povolit jednoduché stínování", &m_inputData.m_isLightShaderActive);
+    ImGui::Text("Nastavení shaderu");
+    ImGui::Checkbox("Povolit jednoduché stínování", &m_inputData.m_isLightShaderActive);
     if (!m_inputData.m_isLightShaderActive) {
         ImGui::BeginDisabled();
     }
 
-    ImGui::SliderFloat(u8"Intenzita světla", &m_inputData.m_lightIntensity, 0.0f, 1.0f);
-    ImGui::SliderFloat(u8"Lesklost materiálu", &m_inputData.m_materialShininess, 0.0f, 256.0f);
-    ImGui::InputFloat3(u8"Pozice světla", glm::value_ptr(m_inputData.m_lightPos));
+    ImGui::SliderFloat("Intenzita světla", &m_inputData.m_lightIntensity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Lesklost materiálu", &m_inputData.m_materialShininess, 0.0f, 256.0f);
+    ImGui::InputFloat3("Pozice světla", glm::value_ptr(m_inputData.m_lightPos));
 
     if (!m_inputData.m_isLightShaderActive) {
         ImGui::EndDisabled();
@@ -263,11 +264,11 @@ ImVec2 WindowSystem::RenderMainMenuBar(bool isObjectRendered) {
         mainMenuBarSize = ImGui::GetWindowSize();
 
         if (ImGui::BeginMenu("Soubor")) {
-            if (ImGui::MenuItem(u8"Otevřít")) {
+            if (ImGui::MenuItem("Otevřít")) {
                 WindowSystem::OpenModelSelectionDialog();
             }
 
-            if (ImGui::MenuItem(u8"Zavřít")) {
+            if (ImGui::MenuItem("Zavřít")) {
                 exit(0);
             }
             ImGui::EndMenu();
@@ -292,30 +293,30 @@ ImVec2 WindowSystem::RenderMainMenuBar(bool isObjectRendered) {
 
 void WindowSystem::RenderClearColorPicker() {
     static ImVec4 color = ImVec4(1.f, 1.f, 1.f, 1.f);
-    ImGui::ColorEdit3(u8"Barva pozadí", (float*)&color);
+    ImGui::ColorEdit3("Barva pozadí", (float*)&color);
     Core::SetBackgroundColor(glm::vec3(color.x, color.y, color.z));
 }
 
 void WindowSystem::RenderModelInfo() {
     ImGui::Separator();
-    ImGui::Text(u8"Model info");
-    ImGui::Text(u8"Počet vertexů: %d", Renderer::GetInstance().GetVerticesCount());
-    ImGui::Text(u8"Počet indexů: %d", Renderer::GetInstance().GetIndicesCount());
+    ImGui::Text("Model info");
+    ImGui::Text("Počet vertexů: %d", Renderer::GetInstance().GetVerticesCount());
+    ImGui::Text("Počet indexů: %d", Renderer::GetInstance().GetIndicesCount());
     ImGui::Separator();
 }
 
 const std::optional<std::string> WindowSystem::RenderTexturesDialog(
-    std::vector<std::string> textures) {
+    std::vector<std::string>& textures) {
     if (s_showTextureErrorWindow) {
         return std::nullopt;
     }
 
     std::optional<std::string> clickedTexture = std::nullopt;
 
-    ImGui::Begin(u8"Automatické hledání textur",
+    ImGui::Begin("Automatické hledání textur",
                  nullptr,
                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text(u8"Textury");
+    ImGui::Text("Textury");
 
     for (auto& texture : textures) {
         if (ImGui::Selectable(texture.c_str())) {
@@ -324,9 +325,9 @@ const std::optional<std::string> WindowSystem::RenderTexturesDialog(
     }
 
     ImGui::Separator();
-    ImGui::Text(u8"Nebo vyberte texturu ručně");
-    ImGui::Checkbox(u8"Obrátit texturu", &s_flipTexture);
-    if (ImGui::Button(u8"Vybrat texturu")) {
+    ImGui::Text("Nebo vyberte texturu ručně");
+    ImGui::Checkbox("Obrátit texturu", &s_flipTexture);
+    if (ImGui::Button("Vybrat texturu")) {
         auto texture = FileDialogManager::GetInstance().InvokeFileDialog();
         std::string extension = std::filesystem::path(texture).extension().string();
         if (std::find(
@@ -343,9 +344,9 @@ const std::optional<std::string> WindowSystem::RenderTexturesDialog(
     }
 
     ImGui::Separator();
-    ImGui::Text(u8"Nebo vyberte barvu modelu");
+    ImGui::Text("Nebo vyberte barvu modelu");
 
-    if (ImGui::Button(u8"Vybrat barvu")) {
+    if (ImGui::Button("Vybrat barvu")) {
         clickedTexture = std::string("");
     }
 
@@ -356,11 +357,11 @@ const std::optional<std::string> WindowSystem::RenderTexturesDialog(
 
 const std::optional<glm::vec3> WindowSystem::RenderModelColorPicker() {
     ImGui::Begin(
-        u8"Barva modelu", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+        "Barva modelu", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
     static ImVec4 color = ImVec4(1.f, 1.f, 1.f, 1.f);
-    ImGui::ColorEdit3(u8"Barva modelu", (float*)&color);
+    ImGui::ColorEdit3("Barva modelu", (float*)&color);
 
-    if (ImGui::Button(u8"Potvrdit")) {
+    if (ImGui::Button("Potvrdit")) {
         ImGui::End();
         return glm::vec3(color.x, color.y, color.z);
     }
@@ -369,18 +370,18 @@ const std::optional<glm::vec3> WindowSystem::RenderModelColorPicker() {
 }
 
 void WindowSystem::RenderGizmoSettings() {
-    ImGui::Text(u8"Nastavení gizma");
-    ImGui::Checkbox(u8"Zobrazit gizmo", &m_renderGizmo);
+    ImGui::Text("Nastavení gizma");
+    ImGui::Checkbox("Zobrazit gizmo", &m_renderGizmo);
     if (!m_renderGizmo) {
         ImGui::BeginDisabled();
     }
 
-    ImGui::SliderFloat(u8"Velikost gizma", &m_gizmoSizeMultiplier, 0.5, 1.5);
-    if (ImGui::RadioButton(u8"Přesun", m_gizmoOperation == ImGuizmo::TRANSLATE))
+    ImGui::SliderFloat("Velikost gizma", &m_gizmoSizeMultiplier, 0.5, 1.5);
+    if (ImGui::RadioButton("Přesun", m_gizmoOperation == ImGuizmo::TRANSLATE))
         m_gizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::RadioButton(u8"Rotace", m_gizmoOperation == ImGuizmo::ROTATE))
+    if (ImGui::RadioButton("Rotace", m_gizmoOperation == ImGuizmo::ROTATE))
         m_gizmoOperation = ImGuizmo::ROTATE;
-    if (ImGui::RadioButton(u8"Škálování", m_gizmoOperation == ImGuizmo::SCALE))
+    if (ImGui::RadioButton("Škálování", m_gizmoOperation == ImGuizmo::SCALE))
         m_gizmoOperation = ImGuizmo::SCALE;
 
     if (!m_renderGizmo) {
@@ -391,23 +392,23 @@ void WindowSystem::RenderGizmoSettings() {
 }
 
 void WindowSystem::RenderCameraSettings() {
-    ImGui::Text(u8"Nastavení kamery");
-    if (ImGui::RadioButton(u8"Freefly kamera", m_cameraSettings.cameraType == 1))
+    ImGui::Text("Nastavení kamery");
+    if (ImGui::RadioButton("Freefly kamera", m_cameraSettings.cameraType == 1))
         m_cameraSettings.cameraType = 1;
-    if (ImGui::RadioButton(u8"Orbitální kamera", m_cameraSettings.cameraType == 0))
+    if (ImGui::RadioButton("Orbitální kamera", m_cameraSettings.cameraType == 0))
         m_cameraSettings.cameraType = 0;
     if (m_cameraSettings.cameraType == 1) {
         ImGui::BeginDisabled();
     }
     ImGui::Separator();
-    if (ImGui::RadioButton(u8"Perspektivní projekce", m_cameraSettings.projectionType == 2))
+    if (ImGui::RadioButton("Perspektivní projekce", m_cameraSettings.projectionType == 2))
         m_cameraSettings.projectionType = 2;
-    if (ImGui::RadioButton(u8"Ortogonální projekce", m_cameraSettings.projectionType == 3))
+    if (ImGui::RadioButton("Ortogonální projekce", m_cameraSettings.projectionType == 3))
         m_cameraSettings.projectionType = 3;
 
     if (m_cameraSettings.projectionType != 2)
         ImGui::BeginDisabled();
-    ImGui::SliderFloat(u8"Zoom", &m_cameraSettings.zoomMultiplier, 0.1f, 10.0f);
+    ImGui::SliderFloat("Zoom", &m_cameraSettings.zoomMultiplier, 0.1f, 10.0f);
     if (m_cameraSettings.projectionType != 2)
         ImGui::EndDisabled();
 

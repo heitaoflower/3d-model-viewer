@@ -1,4 +1,5 @@
 #pragma once
+#include "stb_image.h"
 #include "../Tools/Log.hpp"
 #include "Shader.hpp"
 #include <vector>

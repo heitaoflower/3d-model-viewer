@@ -8,7 +8,6 @@
 class ArcBallCamera {
   public:
     ArcBallCamera();
-    ~ArcBallCamera();
     void ProcessMouseInput(float definedXPos, float definedYPos);
     void RotateAzimuth(const float radians);
     void RotatePolar(const float radians);
@@ -17,18 +16,18 @@ class ArcBallCamera {
     void MoveHorizontal(const float distance);
     void MoveVertical(const float distance);
 
-    void SetFov(const float fov, const glm::vec2 viewportSize);
-    void SetNear(const float near, const glm::vec2 viewportSize);
-    void SetFar(const float far, const glm::vec2 viewportSize);
+    void SetFov(const float fov);
+    void SetNear(const float near);
+    void SetFar(const float far);
 
     void SetProjMatToOrtho();
     void SetProjMatToPerspective(const glm::vec2 viewportSize);
 
     const glm::mat4 GetProjecionMatrix(const glm::vec2 viewportSize);
-    const glm::mat4 GetViewMatrix() const;
-    float GetFov() const;
-    float GetNear() const;
-    float GetFar() const;
+    [[nodiscard]] const glm::mat4 GetViewMatrix() const;
+    [[nodiscard]] float GetFov() const;
+    [[nodiscard]] float GetNear() const;
+    [[nodiscard]] float GetFar() const;
 
   private:
     void RecreateProjectionMatrix(const glm::vec2 viewportSize);

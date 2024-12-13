@@ -38,31 +38,33 @@ void Mesh::SetMesh() {
                           GL_FLOAT,
                           GL_FALSE,
                           sizeof(MeshData::Vertex),
-                          (void*)nullptr); // Do VAO přidat Data
+                          reinterpret_cast<void*>(0)); // Do VAO přidat Data
     // vertex normals
     glEnableVertexAttribArray(1); // Aktivovat VAO na pozici 1
-    glVertexAttribPointer(1,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(MeshData::Vertex),
-                          (void*)offsetof(MeshData::Vertex, normal)); // Do VAO pøidat Data
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(MeshData::Vertex),
+        reinterpret_cast<void*>(offsetof(MeshData::Vertex, normal))); // Do VAO pøidat Data
     // vertex texture coords
     glEnableVertexAttribArray(2); // Aktivovat VAO na pozici 2
-    glVertexAttribPointer(2,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(MeshData::Vertex),
-                          (void*)offsetof(MeshData::Vertex, texCoords)); // Do VAO přidat Data
+    glVertexAttribPointer(
+        2,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(MeshData::Vertex),
+        reinterpret_cast<void*>(offsetof(MeshData::Vertex, texCoords))); // Do VAO přidat Data
 
     glBindVertexArray(0); // unBind
 }
 
-void Mesh::DrawArrays(Shader& shader, bool manualySetTextures) const {
+void Mesh::DrawArrays() const {
     glBindVertexArray(m_VAO);
 
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
 void Mesh::Destroy() {

@@ -61,11 +61,11 @@ uint32_t Skybox::LoadTextureFromFile(std::vector<std::string> cubemapTextures) {
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // y osa
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); // z osa
 
-            dge::Log::LogInfo("Cubemap Textura: " + cubemapTextures[i] + " uspesne nactena!");
+            Log::Info("Cubemap Textura: " + cubemapTextures[i] + " uspesne nactena!");
             stbi_image_free(data);
         }
         else {
-            dge::Log::LogError("Cubemap Textura : " + cubemapTextures[i] + " nebyla nactena!");
+            Log::Error("Cubemap Textura : " + cubemapTextures[i] + " nebyla nactena!");
             stbi_image_free(data);
         }
     }
@@ -93,9 +93,9 @@ void Skybox::CreateCube() {
                             1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f
     };
 
-    m_vao.BindVAO();
-    m_vbo.SetVertices(*vertices, 108);
-    m_vao.AddBuffer(3, 0, 3, 0);
+    //m_vao.BindVAO();
+    //m_vbo.SetVertices(*vertices, 108);
+    //m_vao.AddBuffer(3, 0, 3, 0);
 }
 
 void Skybox::CreateShader() {

@@ -73,7 +73,7 @@ void FpsCamera::ProcessMouseInput(float definedXPos, float definedYPos) {
     m_cameraFront = glm::normalize(front);
 }
 
-void FpsCamera::ProcessSrollInput(float definedXOffset, float definedYOffset) {
+void FpsCamera::ProcessSrollInput(float definedYOffset) {
     m_fov -= definedYOffset;
     if (m_fov < 1.0f)
         m_fov = 1.0f;

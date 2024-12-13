@@ -32,7 +32,7 @@ void ModelLoader::LoadSelectedModel() {
         m_model = std::make_unique<Model>(WindowSystem::s_modelPath.value().string());
         try {
             m_texturePaths = FindTexture(WindowSystem::s_modelPath.value().string());
-            m_waitingForUserInput = TEXTURE_SELECTION;
+            m_waitingForUserInput = USER_INPUT::TEXTURE_SELECTION;
 
             WindowSystem::s_modelPath.reset();
         }
@@ -45,7 +45,7 @@ void ModelLoader::LoadSelectedModel() {
 
 void ModelLoader::RenderSelectedModel(InputData inputData) {
     std::optional<std::string> selectedTexturePath = std::nullopt;
-    if (m_waitingForUserInput == TEXTURE_SELECTION) {
+    if (m_waitingForUserInput == USER_INPUT::TEXTURE_SELECTION) {
         selectedTexturePath = WindowSystem::RenderTexturesDialog(m_texturePaths);
         // Kontrola, zda všechny cesty obsahují podporovanou příponu textur
 
@@ -62,23 +62,23 @@ void ModelLoader::RenderSelectedModel(InputData inputData) {
                                   WindowSystem::s_flipTexture);
                 }
 
-                m_waitingForUserInput = NO_INPUT;
+                m_waitingForUserInput = USER_INPUT::NO_INPUT;
             }
             else {
-                m_waitingForUserInput = COLOR_SELECTION;
+                m_waitingForUserInput = USER_INPUT::COLOR_SELECTION;
             }
         }
     }
 
-    if (m_waitingForUserInput == COLOR_SELECTION) {
+    if (m_waitingForUserInput == USER_INPUT::COLOR_SELECTION) {
         std::optional<glm::vec3> selectedColor = WindowSystem::RenderModelColorPicker();
         if (selectedColor.has_value()) {
             m_model->OverwriteColor(selectedColor.value());
-            m_waitingForUserInput = NO_INPUT;
+            m_waitingForUserInput = USER_INPUT::NO_INPUT;
         }
     }
 
-    if (m_model != nullptr && m_waitingForUserInput == NO_INPUT) {
+    if (m_model != nullptr && m_waitingForUserInput == USER_INPUT::NO_INPUT) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_texture);
         Renderer::GetInstance().RenderModel(*m_model, inputData);
@@ -96,7 +96,7 @@ ModelLoader::~ModelLoader() {
     }
 }
 
-const std::vector<std::string> ModelLoader::FindTexture(const std::string modelPath) const {
+const std::vector<std::string> ModelLoader::FindTexture(const std::string& modelPath) const {
     std::filesystem::path path(modelPath);
 
     // Odstranění poslední části cesty

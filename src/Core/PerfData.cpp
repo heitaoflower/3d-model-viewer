@@ -1,12 +1,12 @@
 ﻿#include "PerfData.hpp"
 
-float PerfData::s_currentFrame = 0;
-float PerfData::s_fps = 0;
-float PerfData::s_deltaTime = 0;
-float PerfData::s_lastFrame = 0;
+float64 PerfData::s_currentFrame = 0;
+float64 PerfData::s_fps = 0;
+float64 PerfData::s_deltaTime = 0;
+float64 PerfData::s_lastFrame = 0;
 
-float PerfData::s_frameCount = 0;
-float PerfData::s_previousTime = 0;
+float64 PerfData::s_frameCount = 0;
+float64 PerfData::s_previousTime = 0;
 
 void PerfData::CollectPerformanceData() {
     s_currentFrame = glfwGetTime();
@@ -25,10 +25,10 @@ void PerfData::CollectPerformanceData() {
     }
 }
 
-float PerfData::GetFPS() {
+float64 PerfData::GetFPS() {
     return s_fps;
 }
 
-float PerfData::GetDeltaTime() {
+float64 PerfData::GetDeltaTime() {
     return s_deltaTime;
 }

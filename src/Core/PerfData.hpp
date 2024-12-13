@@ -1,18 +1,19 @@
 ﻿#pragma once
 #include "../Core/Window.hpp"
+#include "../Types.hpp"
 
 class PerfData {
   private:
-    static float s_fps;
-    static float s_lastFrame;
-    static float s_currentFrame;
-    static float s_deltaTime;
+    static float64 s_fps;
+    static float64 s_lastFrame;
+    static float64 s_currentFrame;
+    static float64 s_deltaTime;
 
-    static float s_frameCount;
-    static float s_previousTime;
+    static float64 s_frameCount;
+    static float64 s_previousTime;
 
   public:
     static void CollectPerformanceData();
-    static float GetFPS();
-    static float GetDeltaTime();
+    static float64 GetFPS();
+    static float64 GetDeltaTime();
 };

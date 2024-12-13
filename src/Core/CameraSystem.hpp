@@ -14,13 +14,13 @@ class CameraSystem {
     static CameraSystem& GetInstance();
     void SetActiveCamera(Cameras camera); // Nastaví aktivní kameru
     Cameras GetActiveCameraType();        // Vrátí aktivní kameru
-    void ProcessMouseScrollInput(const float definedXOffset, const float definedYOffset);
+    void ProcessMouseScrollInput(const float definedYOffset);
     void ProcessMouseInput(const float definedXPos, const float definedYPos);
     [[nodiscard]] const glm::mat4 GetViewMatrix() const; // Vrátí view matici
     const glm::mat4 GetProjectionMatrix();               // Vrátí projekční matici
     const glm::mat4 GetOrthoProjectionMatrix();          // Vrátí projekční matici
     void UpdateInput();                                  // Aktualizuje vstupní data klávesnice
-    void SetFov(const float fov, const glm::vec2 viewportSize);
+    void SetFov(const float fov);
     void SetProjMatToOrtho();
     void SetProjMatToPerspective(const glm::vec2 viewportSize);
     CameraSystem(const CameraSystem&) = delete;

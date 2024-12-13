@@ -12,9 +12,9 @@ CameraSystem& CameraSystem::GetInstance() {
     return instance;
 }
 
-void CameraSystem::SetFov(const float fov, const glm::vec2 viewportSize) {
+void CameraSystem::SetFov(const float fov) {
     if (m_activeCamera == Cameras::ARCBALL) {
-        m_orbitalCamera.SetFov(fov, viewportSize);
+        m_orbitalCamera.SetFov(fov);
     }
 }
 
@@ -47,13 +47,13 @@ void CameraSystem::SetZoomMultiplier(float zoomMultiplier) {
     m_zoomMultiplier = zoomMultiplier;
 }
 
-void CameraSystem::ProcessMouseScrollInput(const float definedXOffset, const float definedYOffset) {
+void CameraSystem::ProcessMouseScrollInput(const float definedYOffset) {
     if (!m_inputState) {
         return;
     }
 
     if (m_activeCamera == Cameras::FIRST_PERSON) {
-        m_fpsCamera.ProcessSrollInput(definedXOffset, definedYOffset);
+        m_fpsCamera.ProcessSrollInput(definedYOffset);
     }
     else {
         m_orbitalCamera.Zoom(definedYOffset * m_zoomMultiplier);

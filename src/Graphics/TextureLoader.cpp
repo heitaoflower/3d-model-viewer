@@ -20,7 +20,7 @@ uint32_t loadTexture(const std::string& directoryPath, uint32_t filtering, bool 
             format = GL_RGBA;
 
         glBindTexture(GL_TEXTURE_2D, m_textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int32_t>(format), width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         if (colorChannels == 4) { // Transparentní textury se nesmí opakovat,

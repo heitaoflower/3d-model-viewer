@@ -5,7 +5,7 @@
 
 class Renderer {
   public:
-    const void RenderModel(const Model& model, const InputData& inputData);
+    void RenderModel(const Model& model, const InputData& inputData);
     static Renderer& GetInstance();
     [[nodiscard]] uint32_t GetVerticesCount() const;
     [[nodiscard]] uint32_t GetIndicesCount() const;

@@ -60,7 +60,7 @@ uint32_t Shader::CompileShader(uint32_t type, const std::string& shaderPath) {
     uint32_t id = glCreateShader(type);
     const char* src = shaderPath.c_str();
 
-    glShaderSource(id, 1, &src, NULL);
+    glShaderSource(id, 1, &src, nullptr);
     glCompileShader(id);
 
     int result;
@@ -84,46 +84,46 @@ uint32_t Shader::GetShaderProgram() {
     return m_shaderProgram;
 }
 
-void Shader::SetUniform(std::string uniformName, int uniformData) {
+void Shader::SetUniform(const std::string& uniformName, int uniformData) {
     glUseProgram(m_shaderProgram);
     glUniform1i(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
 }
 
-void Shader::SetUniform(std::string uniformName, uint32_t uniformData) {
+void Shader::SetUniform(const std::string& uniformName, uint32_t uniformData) {
     glUseProgram(m_shaderProgram);
     glUniform1ui(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
 }
 
-void Shader::SetUniform(std::string uniformName, glm::mat4 uniformData) {
+void Shader::SetUniform(const std::string& uniformName, glm::mat4 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
     glUniformMatrix4fv(uLoc, 1, GL_FALSE, glm::value_ptr(uniformData));
 }
 
-void Shader::SetUniform(std::string uniformName, glm::vec3 uniformData) {
+void Shader::SetUniform(const std::string& uniformName, glm::vec3 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
     glUniform3f(uLoc, uniformData.x, uniformData.y, uniformData.z);
 }
 
-void Shader::SetUniform(std::string uniformName, glm::vec2 uniformData) {
+void Shader::SetUniform(const std::string& uniformName, glm::vec2 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
     glUniform2f(uLoc, uniformData.x, uniformData.y);
 }
 
-void Shader::SetUniform(std::string uniformName, glm::vec4 uniformData) {
+void Shader::SetUniform(const std::string& uniformName, glm::vec4 uniformData) {
     glUseProgram(m_shaderProgram);
     uint32_t uLoc = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
     glUniform4f(uLoc, uniformData.x, uniformData.y, uniformData.z, uniformData.w);
 }
 
-void Shader::SetUniform(std::string uniformName, bool uniformData) {
+void Shader::SetUniform(const std::string& uniformName, bool uniformData) {
     glUseProgram(m_shaderProgram);
     glUniform1i(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
 }
 
-void Shader::SetUniform(std::string uniformName, float uniformData) {
+void Shader::SetUniform(const std::string& uniformName, float uniformData) {
     glUseProgram(m_shaderProgram);
     glUniform1f(glGetUniformLocation(m_shaderProgram, uniformName.c_str()), uniformData);
 }
@@ -134,18 +134,18 @@ void Shader::Bind() {
 
 // Přetížení << pro výpis kódu shaderu pro debugování
 std::ostream& operator<<(std::ostream& os, const Shader& sh) {
-    os << std::endl;
+    os << '\n';
     os << "/Begin of Vertex Shader Code/"
        << "\n"
-       << sh.m_fragmentShaderCode << std::endl
-       << "/End of Vertex Shader Code/" << std::endl;
+       << sh.m_fragmentShaderCode << '\n'
+       << "/End of Vertex Shader Code/" << '\n';
 
-    os << std::endl << std::endl;
+    os << '\n' << '\n';
 
     os << "/Begin of Fragment Shader Code/"
        << "\n"
-       << sh.m_vertexShaderCode << std::endl
-       << "/End of Fragment Shader Code/" << std::endl;
+       << sh.m_vertexShaderCode << '\n'
+       << "/End of Fragment Shader Code/" << '\n';
 
     return os;
 }

@@ -1,5 +1,7 @@
 ﻿#include "Model.hpp"
 
+#include <utility>
+
 Model::Model(const std::string& directoryPath, bool manualySetTextures) {
     m_directoryPath = directoryPath;
     m_manualySetTextures = manualySetTextures;
@@ -8,16 +10,12 @@ Model::Model(const std::string& directoryPath, bool manualySetTextures) {
     m_model = glm::mat4(1.f);
 }
 
-const void Model::DrawArrays(Shader& shader) const {
-    if (m_manualySetTextures) {
-        // glActiveTexture(GL_TEXTURE1);
-        // glBindTexture(GL_TEXTURE_2D, m_loadedTextures[0].id);
-    }
-    for (uint32_t i = 0; i < m_meshes.size(); i++) // Každý mesh ve vectoru vykreslit
-        m_meshes[i].DrawArrays(shader, m_manualySetTextures);
+void Model::DrawArrays() const {
+    for (const auto& m_meshe : m_meshes) // Každý mesh ve vectoru vykreslit
+        m_meshe.DrawArrays();
 }
 
-void Model::LoadModel(std::string directoryPath) {
+void Model::LoadModel(const std::string& directoryPath) {
 
     Assimp::Importer importer;
     auto scene = importer.ReadFile(directoryPath, aiProcess_Triangulate);
@@ -59,8 +57,6 @@ Mesh Model::ProcessMesh(aiMesh* mesh,
     std::vector<MeshData::Vertex> vertices;
     std::vector<uint32_t> indices;
     std::vector<MeshData::Texture> textures;
-
-    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
     // Projit každý vertex meshe
     for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
@@ -117,14 +113,13 @@ Mesh Model::ProcessMesh(aiMesh* mesh,
         }
     }
 
-    return Mesh(vertices, indices,
-                textures); // Vrátí celý jeden Mesh
+    return { vertices, indices, textures }; // Vrátí celý jeden Mesh
 }
 
 void Model::OverwriteTexture(uint32_t texture) {
     m_loadedTextures.clear();
     m_loadedTexturesPaths.clear();
-    m_loadedTextures.push_back({ texture, "diffuse" });
+    m_loadedTextures.push_back({ texture, "diffuse", "" });
     m_manualySetTextures = true;
 }
 
@@ -136,18 +131,18 @@ void Model::OverwriteColor(glm::vec3 color) {
     m_color = glm::vec4(color, 1.0f);
 }
 
-const uint32_t Model::GetVerticesCount() const {
+uint32_t Model::GetVerticesCount() const {
     uint32_t vertexCount = 0;
-    for (int i = 0; i < m_meshes.size(); i++) {
-        vertexCount += m_meshes[i].vertices.size();
+    for (const auto& m_meshe : m_meshes) {
+        vertexCount += m_meshe.vertices.size();
     }
     return vertexCount;
 }
 
-const uint32_t Model::GetIndicesCount() const {
+uint32_t Model::GetIndicesCount() const {
     uint32_t indicesCount = 0;
-    for (int i = 0; i < m_meshes.size(); i++) {
-        indicesCount += m_meshes[i].indices.size();
+    for (const auto& m_meshe : m_meshes) {
+        indicesCount += m_meshe.indices.size();
     }
     return indicesCount;
 }
@@ -164,7 +159,9 @@ std::vector<MeshData::Texture> Model::LoadMaterialTextures(aiMaterial* mat,
         mat->GetTexture(type, i, &str);
         filename = str.C_Str();
         filename = filename.substr(filename.find_last_of('\\') + 1, filename.length());
-        filename = m_directoryPath + "/textures/" + filename;
+        filename = m_directoryPath;
+        filename += "/textures/";
+        filename += filename;
 
         for (uint32_t j = 0; j < m_loadedTextures.size(); j++) {
             if (m_loadedTexturesPaths[j] == str.C_Str()) {
@@ -177,10 +174,10 @@ std::vector<MeshData::Texture> Model::LoadMaterialTextures(aiMaterial* mat,
     }
     if (!skip && std::string(str.C_Str()).find_last_of('\\') < 1000) {
         MeshData::Texture texture;
-        m_loadedTexturesPaths.push_back(str.C_Str());
+        m_loadedTexturesPaths.emplace_back(str.C_Str());
 
         texture.id = loadTexture(filename, GL_LINEAR, true);
-        texture.type = typeName;
+        texture.type = std::move(typeName);
 
         texturesToReturn.push_back(texture);
         m_loadedTextures.push_back(texture);
@@ -190,7 +187,7 @@ std::vector<MeshData::Texture> Model::LoadMaterialTextures(aiMaterial* mat,
 }
 
 Model::~Model() {
-    for (int i = 0; i < m_meshes.size(); i++) {
-        m_meshes[i].Destroy();
+    for (auto& m_meshe : m_meshes) {
+        m_meshe.Destroy();
     }
 }

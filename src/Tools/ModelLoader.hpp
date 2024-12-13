@@ -4,13 +4,13 @@
 #include "../Graphics/Renderer.hpp"
 #include <filesystem>
 
-enum USER_INPUT {
+enum class USER_INPUT : uint8_t {
     TEXTURE_SELECTION,
     COLOR_SELECTION,
     NO_INPUT
 };
 
-enum MODEL_EXPORT_TYPE {
+enum MODEL_EXPORT_TYPE : uint8_t {
     OBJ,
     GLTF,
     FBX,
@@ -22,7 +22,7 @@ class ModelLoader {
   private:
     std::unique_ptr<Model> m_model;
     uint32_t m_texture;
-    USER_INPUT m_waitingForUserInput = NO_INPUT;
+    USER_INPUT m_waitingForUserInput = USER_INPUT::NO_INPUT;
     std::vector<std::string> m_texturePaths;
     std::optional<MODEL_EXPORT_TYPE> m_lastExportType;
 
@@ -32,5 +32,5 @@ class ModelLoader {
     void LoadSelectedModel();
     void RenderSelectedModel(InputData inputData);
     bool IsModelLoaded();
-    const std::vector<std::string> FindTexture(const std::string modelPath) const;
+    [[nodiscard]] const std::vector<std::string> FindTexture(const std::string& modelPath) const;
 };

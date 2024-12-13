@@ -9,12 +9,12 @@ bool Window::s_Vsync = false;
 uint32_t Window::s_windowHeight = 720;
 uint32_t Window::s_windowWidth = 1280;
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+void mouse_callback(GLFWwindow* /*window*/, double xpos, double ypos) {
     CameraSystem::GetInstance().ProcessMouseInput(xpos, ypos);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    CameraSystem::GetInstance().ProcessMouseScrollInput(xoffset, yoffset);
+void scroll_callback(GLFWwindow* /*window*/, double  /*xoffset*/, double yoffset) {
+    CameraSystem::GetInstance().ProcessMouseScrollInput(yoffset);
 }
 
 void Window::OnRenderStart() {
@@ -47,7 +47,7 @@ bool Window::InitWindow(const uint32_t windowWidth,
         return false;
 
     s_window = glfwCreateWindow(
-        Window::s_windowWidth, Window::s_windowHeight, windowTitle.c_str(), NULL, NULL);
+        Window::s_windowWidth, Window::s_windowHeight, windowTitle.c_str(), nullptr, nullptr);
 
     if (!s_window) {
         glfwTerminate();
@@ -125,23 +125,23 @@ void Window::SetCursorVisible(bool visible) {
     s_isCursorVisible = visible;
 }
 
-const bool Window::GetVsyncBool() {
+bool Window::GetVsyncBool() {
     return s_Vsync;
 }
-const int Window::GetWindowWidth() {
+int Window::GetWindowWidth() {
     return s_windowWidth;
 }
-const int Window::GetWindowHeight() {
+int Window::GetWindowHeight() {
     return s_windowHeight;
 }
-const bool Window::GetCursorVisibility() {
+bool Window::GetCursorVisibility() {
     return s_isCursorVisible;
 }
 GLFWwindow* Window::GetGLFWwindowRef() {
     return s_window;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow*  /*window*/, int width, int height) {
     int _height, _width;
 
     if (width != Window::GetWindowWidth() || height != Window::GetWindowHeight()) {

@@ -23,11 +23,11 @@ class FpsCamera {
     bool m_firstMouse;
     void ProcessKeyboardInput();
     void ProcessMouseInput(float definedXPos, float definedYPos);
-    void ProcessSrollInput(float definedXOffset, float definedYOffset);
+    void ProcessSrollInput(float definedYOffset);
 
-    glm::mat4 GetViewMatrix() const;
-    glm::mat4 GetProjectionMatrix(glm::vec2 viewportSize) const;
-    glm::vec3 GetCameraPosition() const;
+    [[nodiscard]] glm::mat4 GetViewMatrix() const;
+    [[nodiscard]] glm::mat4 GetProjectionMatrix(glm::vec2 viewportSize) const;
+    [[nodiscard]] glm::vec3 GetCameraPosition() const;
 
     void SetCameraMovementSpeed(float movementSpeed);
     void SetCameraFov(float fov);
@@ -35,8 +35,8 @@ class FpsCamera {
     void SetCameraPosition(glm::vec3 position);
     void SetCameraMouseVisibility(bool isVisible);
 
-    float GetFov() const;
-    float GetSensitivity() const;
-    float GetMovementSpeed() const;
-    bool GetIsCursorVisible() const;
+    [[nodiscard]] float GetFov() const;
+    [[nodiscard]] float GetSensitivity() const;
+    [[nodiscard]] float GetMovementSpeed() const;
+    [[nodiscard]] bool GetIsCursorVisible() const;
 };
