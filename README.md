@@ -1,2 +1,3 @@
 # 3d-model-viewer
-![viewervid](https://github.com/DotrixXP/3d-model-viewer/assets/66275493/69903b03-b7ce-474d-8b55-a6f211e36fa2)
+Simple 3d model viewer supporting wide variety of 3D formats.
+![Snímek obrazovky_20241214_113118](https://github.com/user-attachments/assets/ac6d712d-cb21-45aa-b252-eeccd958d72c)
