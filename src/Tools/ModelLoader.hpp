@@ -19,13 +19,6 @@ enum MODEL_EXPORT_TYPE : uint8_t {
 std::string getExportTypeString(MODEL_EXPORT_TYPE exportType);
 
 class ModelLoader {
-  private:
-    std::unique_ptr<Model> m_model;
-    uint32_t m_texture;
-    USER_INPUT m_waitingForUserInput = USER_INPUT::NO_INPUT;
-    std::vector<std::string> m_texturePaths;
-    std::optional<MODEL_EXPORT_TYPE> m_lastExportType;
-
   public:
     ModelLoader();
     ~ModelLoader();
@@ -33,4 +26,11 @@ class ModelLoader {
     void RenderSelectedModel(InputData inputData);
     bool IsModelLoaded();
     [[nodiscard]] const std::vector<std::string> FindTexture(const std::string& modelPath) const;
+
+  private:
+    std::unique_ptr<Model> m_model;
+    uint32_t m_texture;
+    USER_INPUT m_waitingForUserInput = USER_INPUT::NO_INPUT;
+    std::vector<std::string> m_texturePaths;
+    std::optional<MODEL_EXPORT_TYPE> m_lastExportType;
 };
