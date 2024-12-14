@@ -31,6 +31,24 @@ void Renderer::RenderModel(const Model& model, const InputData& inputData) {
     model.DrawArrays();
 }
 
+void Renderer::RenderSkybox() {
+    glm::mat4 view = glm::mat4(glm::mat3(CameraSystem::GetInstance().GetViewMatrix()));
+    glm::mat4 projection = glm::perspective(
+        glm::radians(CameraSystem::GetInstance().GetFov()), 16.f / 9.f, 0.1f, 150.0f);
+
+    glDepthFunc(GL_LEQUAL);
+    m_skybox.GetSkyboxShader().SetUniform("view", view);
+    m_skybox.GetSkyboxShader().SetUniform("projection", projection);
+    m_skybox.GetSkyboxShader().Bind();
+    uint32_t vao = m_skybox.GetVAO();
+    glBindVertexArray(vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetCubeMapTex());
+    OpenglAPI::DrawArrays(GL_TRIANGLES, 36);
+    glDepthFunc(GL_LESS);
+    glBindVertexArray(0);
+}
+
 uint32_t Renderer::GetVerticesCount() const {
     return m_verticesCount;
 }
@@ -58,6 +76,7 @@ Renderer::Renderer()
     , m_lightShaderIsActive(true)
     , m_lightIntensity(1.0f)
     , m_wireframeMode(false)
+    , m_skybox("/home/dominik/Projekty/3d-model-viewer/res/skybox", ".png")
     , m_lightShader(
           (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/light.frag.glsl")
               .c_str(),

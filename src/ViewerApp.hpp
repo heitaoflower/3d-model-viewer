@@ -41,7 +41,9 @@ inline void ViewerApp::Run(const std::string& initialModelPath) {
         CameraSystem::GetInstance().UpdateInput();
         CameraSystem::GetInstance().SetInputState(inputData.GetAllowCameraInput());
         modelLoader.LoadSelectedModel();
+
         modelLoader.RenderSelectedModel(inputData);
+        // Renderer::GetInstance().RenderSkybox();
         Renderer::GetInstance().SetLightShaderActive(inputData.GetIsLightShaderActive());
         Renderer::GetInstance().SetLightIntensity(inputData.GetLightIntensity());
         Renderer::GetInstance().SetWireframeMode(inputData.GetWireframeMode());

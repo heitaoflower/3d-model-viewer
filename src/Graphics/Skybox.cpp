@@ -93,14 +93,32 @@ void Skybox::CreateCube() {
                             1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f
     };
 
-    //m_vao.BindVAO();
-    //m_vbo.SetVertices(*vertices, 108);
-    //m_vao.AddBuffer(3, 0, 3, 0);
+    glGenVertexArrays(1, &m_vao);
+    glGenBuffers(1, &m_vbo);
+
+    glBindVertexArray(m_vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+uint32_t Skybox::GetVAO() const {
+    return m_vao;
+}
+
+uint32_t Skybox::GetCubeMapTex() const {
+    return m_textureID;
 }
 
 void Skybox::CreateShader() {
-    m_cubemapShader = new Shader("res/engine/shaders/Skybox/cubemap.frag",
-                                 "res/engine/shaders/Skybox/cubemap.vert");
+    m_cubemapShader = new Shader("/home/dominik/Projekty/3d-model-viewer/res/cubemap.frag",
+                                 "/home/dominik/Projekty/3d-model-viewer/res/cubemap.vert");
 }
 
 Shader& Skybox::GetSkyboxShader() const {

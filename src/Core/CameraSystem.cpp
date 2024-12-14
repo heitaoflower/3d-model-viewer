@@ -30,6 +30,15 @@ void CameraSystem::SetProjMatToPerspective(const glm::vec2 viewportSize) {
     }
 }
 
+float CameraSystem::GetFov() {
+    if (m_activeCamera == Cameras::ARCBALL) {
+        return m_orbitalCamera.GetFov();
+    }
+    else {
+        return m_fpsCamera.GetFov();
+    }
+}
+
 const glm::mat4 CameraSystem::GetOrthoProjectionMatrix() {
     return glm::ortho(
         -1.0f, 1.0f, -1.0f, 1.0f, m_orbitalCamera.GetNear(), m_orbitalCamera.GetFar());

@@ -29,6 +29,7 @@ class CameraSystem {
     CameraSystem& operator=(CameraSystem&&) = delete;
     void SetInputState(bool state);
     void SetZoomMultiplier(float zoomMultiplier);
+    float GetFov();
 
   private:
     CameraSystem() noexcept;

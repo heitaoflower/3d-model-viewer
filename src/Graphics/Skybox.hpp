@@ -10,7 +10,8 @@ class Skybox {
     Skybox(const std::string& folderDirectoryPath, const std::string& fileFormat);
     ~Skybox();
     [[nodiscard]] Shader& GetSkyboxShader() const;
-
+    [[nodiscard]] uint32_t GetVAO() const;
+    [[nodiscard]] uint32_t GetCubeMapTex() const; 
   private:
     std::vector<std::string> m_cubemapTextures;
     uint32_t m_textureID;
