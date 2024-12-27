@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "GuiStyle.hpp"
 #include <ranges>
+#include <utility>
 
 glm::vec2 WindowSystem::s_viewportWinSize = glm::vec2(-1.0f);
 std::optional<std::filesystem::path> WindowSystem::s_modelPath = std::nullopt;
@@ -298,8 +299,7 @@ void WindowSystem::RenderShaderSettings() {
 
     ImGui::SliderFloat("Intenzita světla", &m_inputData.m_lightIntensity, 0.0f, 1.0f);
     ImGui::SliderFloat("Lesklost materiálu", &m_inputData.m_materialShininess, 0.0f, 256.0f);
-    ImGui::InputFloat3("Pozice světla", glm::value_ptr(m_inputData.m_lightPos));
-
+    ImGui::DragFloat3("Pozice světla", glm::value_ptr(m_inputData.m_lightPos), 1.0f);
     if (!m_inputData.m_lightShaderActive) {
         ImGui::EndDisabled();
     }
@@ -355,26 +355,52 @@ void WindowSystem::RenderModelInfo() {
     ImGui::Separator();
 }
 
-const std::optional<std::string> WindowSystem::RenderTexturesDialog(
-    std::vector<std::string>& textures) {
-    if (s_showTextureErrorWindow) {
-        return std::nullopt;
-    }
+MaterialSelection::MaterialSelection(std::optional<std::string> diffuse,
+                                     std::optional<std::string> specular) {
+    this->diffuse = std::move(diffuse);
+    this->specular = std::move(specular);
+}
 
-    std::optional<std::string> clickedTexture = std::nullopt;
+MaterialSelection::MaterialSelection()
+    : diffuse(std::nullopt)
+    , specular(std::nullopt) {}
+
+bool WindowSystem::RenderTexturesDialog(MaterialSelection& materialSelection,
+                                        std::vector<std::string>& textures) {
+    if (s_showTextureErrorWindow) {
+        return false;
+    }
 
     ImGui::Begin("Automatické hledání textur",
                  nullptr,
                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("Textury");
+    ImGui::Text("Vyberte diffuse texturu");
 
     for (auto& texture : textures) {
-        if (ImGui::Selectable(texture.c_str())) {
-            clickedTexture = texture;
+        bool isSelected = (materialSelection.diffuse == texture);
+        if (ImGui::Selectable((texture + " -> Diffuse").c_str(), isSelected)) {
+            materialSelection.diffuse = texture;
+            Log::Info("Diffuse textura: " + texture);
+        }
+        if (isSelected) {
+            ImGui::SetItemDefaultFocus();
         }
     }
 
     ImGui::Separator();
+    ImGui::Text("Vyberte specular texturu");
+
+    for (auto& texture : textures) {
+        bool isSelected = (materialSelection.specular == texture);
+        if (ImGui::Selectable((texture + " -> Specular").c_str(), isSelected)) {
+            materialSelection.specular = texture;
+            Log::Info("Specular textura: " + texture);
+        }
+        if (isSelected) {
+            ImGui::SetItemDefaultFocus();
+        }
+    }
+
     ImGui::Text("Nebo vyberte texturu ručně");
     ImGui::Checkbox("Obrátit texturu", &s_flipTexture);
     if (ImGui::Button("Vybrat texturu")) {
@@ -386,10 +412,10 @@ const std::optional<std::string> WindowSystem::RenderTexturesDialog(
             Log::Error("Nepodporovaný formát textury:" + texture);
             s_showTextureErrorWindow = true;
             ImGui::End();
-            return std::nullopt;
+            return false;
         }
         else {
-            clickedTexture = texture;
+            materialSelection.diffuse = texture;
         }
     }
 
@@ -397,12 +423,20 @@ const std::optional<std::string> WindowSystem::RenderTexturesDialog(
     ImGui::Text("Nebo vyberte barvu modelu");
 
     if (ImGui::Button("Vybrat barvu")) {
-        clickedTexture = std::string("");
+        materialSelection.diffuse = std::string("");
     }
 
+    ImGui::Separator();
+    if (ImGui::Button("Potvrdit")) {
+        ImGui::End();
+        if (!materialSelection.diffuse.has_value()) {
+            return false;
+        }
+        return true;
+    }
     ImGui::End();
 
-    return clickedTexture;
+    return false;
 }
 
 const std::optional<glm::vec3> WindowSystem::RenderModelColorPicker() {

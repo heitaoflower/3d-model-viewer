@@ -22,7 +22,7 @@ inline void ViewerApp::Run(const std::string& initialModelPath) {
     std::string modelPath = initialModelPath;
     Window::InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "3D Model Viewer");
     Window::SetVsync(true);
-    // GLDebug::EnableDebugMode();
+    GLDebug::EnableDebugMode();
     OpenglData::SetFaceCulling(false);
     OpenglData::SetDepthTesting(true);
     WindowSystem windowsSystem;

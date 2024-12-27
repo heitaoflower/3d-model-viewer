@@ -6,7 +6,9 @@ in vec3 FragPos;
 
 out vec4 FragColor;
 
-uniform sampler2D texture1;
+uniform bool hasSpecularTexture;
+uniform sampler2D diffuse;
+uniform sampler2D specular;
 uniform vec4 color;
 uniform float intensityMultiplier;
 uniform vec3 lightPos;
@@ -23,15 +25,20 @@ void main()
     float diff = max(dot(normalizedNormal, lightDir), 0.0);
     float spec = pow(max(dot(normalizedNormal, halfDir), 0.0), shininess); 
 
-    vec3 ambient = 0.1 * vec3(texture(texture1, TexCoord)); // Ambient component
-    vec3 diffuse = diff * vec3(texture(texture1, TexCoord)); // Diffuse component
-    vec3 specular = spec * vec3(1.0); // Specular component
+    vec3 ambientComponent = 0.1 * vec3(texture(diffuse, TexCoord)); // Ambient component
+    vec3 diffuseComponent = diff * vec3(texture(diffuse, TexCoord)); // Diffuse component
+    
+    vec3 specularComponent;
+    if (hasSpecularTexture) {
+        specularComponent = spec * vec3(texture(specular, TexCoord)); // Specular component with texture
+    } else {
+        specularComponent = spec * vec3(1.0); // Specular component without texture
+    }
 
-    vec3 result = (ambient + diffuse + specular) * intensityMultiplier;
+    vec3 result = (ambientComponent + diffuseComponent + specularComponent) * intensityMultiplier;
 
     if (color.a < 0.1)
         FragColor = vec4(result, 1.0);
     else
         FragColor = color * vec4(result, 1.0);
 }
-

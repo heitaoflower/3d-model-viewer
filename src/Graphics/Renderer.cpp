@@ -6,6 +6,7 @@ Renderer& Renderer::GetInstance() {
 }
 
 void Renderer::RenderModel(const Model& model, const InputData& inputData) {
+
     auto modelMatrix = inputData.GetModelMatrix();
 
     m_indicesCount = model.GetIndicesCount();
@@ -19,6 +20,15 @@ void Renderer::RenderModel(const Model& model, const InputData& inputData) {
         m_lightShader.SetUniform("color", model.GetColor());
         m_lightShader.SetUniform("lightPos", inputData.GetLightPos());
         m_lightShader.SetUniform("shininess", inputData.GetMaterialShininess());
+
+        m_lightShader.SetUniform("diffuse", 0);
+        m_lightShader.SetUniform("hasSpecularTexture", model.GetSpecularTex() != 0);
+        m_lightShader.SetUniform("specular", 1);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, model.GetDiffuseTex());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, model.GetSpecularTex());
     }
     else if (m_activeShader == Shaders::SIMPLE) {
         m_simpleShader.Bind();
@@ -26,6 +36,9 @@ void Renderer::RenderModel(const Model& model, const InputData& inputData) {
         m_simpleShader.SetUniform("view", CameraSystem::GetInstance().GetViewMatrix());
         m_simpleShader.SetUniform("model", modelMatrix);
         m_simpleShader.SetUniform("color", model.GetColor());
+        m_simpleShader.SetUniform("diffuse", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, model.GetDiffuseTex());
     }
     else {
         m_reflect.Bind();
@@ -37,7 +50,9 @@ void Renderer::RenderModel(const Model& model, const InputData& inputData) {
                                  ? CameraSystem::GetInstance().GetViewMatrix()[3]
                                  : glm::vec3(0.0f));
 
-        m_reflect.SetUniform("skybox", m_skybox.GetCubeMapTex());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetCubeMapTex());
+        m_reflect.SetUniform("skybox", 0);
     }
 
     model.DrawArrays();
@@ -89,11 +104,12 @@ Renderer::Renderer()
     , m_lightIntensity(1.0f)
     , m_wireframeMode(false)
     , m_skybox("/home/dominik/Projekty/3d-model-viewer/res/skybox1", ".jpg")
-    , m_reflect(
-          (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/reflect.frag.glsl")
-              .c_str(),
-          (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/reflect.vert.glsl")
-              .c_str())
+    , m_reflect((std::string(GLOBAL_PATH)
+                 + "/home/dominik/Projekty/3d-model-viewer/res/reflect.frag.glsl")
+                    .c_str(),
+                (std::string(GLOBAL_PATH)
+                 + "/home/dominik/Projekty/3d-model-viewer/res/reflect.vert.glsl")
+                    .c_str())
     , m_lightShader(
           (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/light.frag.glsl")
               .c_str(),

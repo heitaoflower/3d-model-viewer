@@ -12,6 +12,14 @@
 
 enum class Shaders : uint8_t;
 
+struct MaterialSelection {
+    std::optional<std::string> diffuse;
+    std::optional<std::string> specular;
+
+    MaterialSelection(std::optional<std::string> diffuse, std::optional<std::string> specular);
+    MaterialSelection();
+};
+
 struct InputData {
   private:
     glm::vec3 m_modelPos;
@@ -22,7 +30,6 @@ struct InputData {
     bool m_lightShaderActive;
     bool m_simpleShaderActive;
     bool m_reflectShaderActive;
-
     float m_lightIntensity;
     bool m_wireframeMode;
     glm::mat4 model;
@@ -66,14 +73,14 @@ class WindowSystem {
 
     static bool s_flipTexture;
 
-    static const std::optional<std::string> RenderTexturesDialog(
-        std::vector<std::string>& textures);
+    static bool RenderTexturesDialog(MaterialSelection& materialSelection,
+                                     std::vector<std::string>& textures);
 
     static const std::optional<glm::vec3> RenderModelColorPicker();
 
   private:
     static glm::vec2 s_viewportWinSize;
-    
+
     inline void RenderPositionsWidgets();
     inline void RenderClearColorPicker();
     inline void RenderModelInfo();

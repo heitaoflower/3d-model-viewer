@@ -1,24 +1,10 @@
 ﻿#include "ModelLoader.hpp"
 
-std::string getExportTypeString(MODEL_EXPORT_TYPE exportType) {
-    switch (exportType) {
-    case OBJ:
-        return "obj";
-    case GLTF:
-        return "gltf";
-    case FBX:
-        return "fbx";
-    default:
-        Log::Error("Unknown export type");
-        throw std::runtime_error("Unknown export type");
-    }
-}
-
 ModelLoader::ModelLoader()
     : m_model(nullptr)
-    , m_texture(0)
-    , m_texturePaths(std::vector<std::string>())
-    , m_lastExportType(std::nullopt) {}
+    , m_diffuseTexture(0)
+    , m_specularTexture(0)
+    , m_texturePaths(std::vector<std::string>()) {}
 
 void ModelLoader::LoadSelectedModel() {
     if (WindowSystem::s_modelPath.has_value()) {
@@ -44,28 +30,59 @@ void ModelLoader::LoadSelectedModel() {
 }
 
 void ModelLoader::RenderSelectedModel(InputData inputData) {
-    std::optional<std::string> selectedTexturePath = std::nullopt;
-    if (m_waitingForUserInput == USER_INPUT::TEXTURE_SELECTION) {
-        selectedTexturePath = WindowSystem::RenderTexturesDialog(m_texturePaths);
-        // Kontrola, zda všechny cesty obsahují podporovanou příponu textur
 
-        if (selectedTexturePath.has_value()) {
-            if (selectedTexturePath.value() != "") {
-                if (m_texture == 0) {
-                    m_texture = loadTexture(selectedTexturePath.value().c_str(),
-                                            GL_LINEAR,
-                                            WindowSystem::s_flipTexture);
+    if (m_waitingForUserInput == USER_INPUT::TEXTURE_SELECTION) {
+        if (m_diffuseTexture != 0) {
+            glDeleteTextures(1, &m_diffuseTexture);
+            m_diffuseTexture = 0;
+        }
+
+        if (m_specularTexture != 0) {
+            glDeleteTextures(1, &m_specularTexture);
+            m_specularTexture = 0;
+        }
+
+        bool selected = WindowSystem::RenderTexturesDialog(m_materialSelection, m_texturePaths);
+
+        // Kontrola, zda všechny cesty obsahují podporovanou příponu textur
+        if (selected) {
+            if (m_materialSelection.diffuse.has_value()) {
+                if (m_materialSelection.diffuse.value() != "") {
+                    if (m_diffuseTexture == 0) {
+                        m_diffuseTexture = loadTexture(m_materialSelection.diffuse.value().c_str(),
+                                                       GL_LINEAR,
+                                                       WindowSystem::s_flipTexture);
+                        m_model->SetDiffuseTex(m_diffuseTexture);
+                    }
+                    else {
+                        updateTexture(m_diffuseTexture,
+                                      m_materialSelection.diffuse.value().c_str(),
+                                      WindowSystem::s_flipTexture);
+                    }
+
+                    m_waitingForUserInput = USER_INPUT::NO_INPUT;
                 }
                 else {
-                    updateTexture(m_texture,
-                                  selectedTexturePath.value().c_str(),
-                                  WindowSystem::s_flipTexture);
+                    m_waitingForUserInput = USER_INPUT::COLOR_SELECTION;
                 }
-
-                m_waitingForUserInput = USER_INPUT::NO_INPUT;
             }
-            else {
-                m_waitingForUserInput = USER_INPUT::COLOR_SELECTION;
+
+            if (m_materialSelection.specular.has_value()) {
+                if (m_materialSelection.specular.value() != "") {
+                    Log::Info("Specular texture: " + m_materialSelection.specular.value());
+                    if (m_specularTexture == 0) {
+                        m_specularTexture
+                            = loadTexture(m_materialSelection.specular.value().c_str(),
+                                          GL_LINEAR,
+                                          WindowSystem::s_flipTexture);
+                        m_model->SetSpecularTex(m_specularTexture);
+                    }
+                    else {
+                        updateTexture(m_specularTexture,
+                                      m_materialSelection.specular.value().c_str(),
+                                      WindowSystem::s_flipTexture);
+                    }
+                }
             }
         }
     }
@@ -79,8 +96,7 @@ void ModelLoader::RenderSelectedModel(InputData inputData) {
     }
 
     if (m_model != nullptr && m_waitingForUserInput == USER_INPUT::NO_INPUT) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_texture);
+        m_materialSelection = MaterialSelection();
         Renderer::GetInstance().RenderModel(*m_model, inputData);
     }
 }
@@ -90,9 +106,13 @@ bool ModelLoader::IsModelLoaded() {
 }
 
 ModelLoader::~ModelLoader() {
-    if (m_texture != 0) {
-        glDeleteTextures(1, &m_texture);
-        m_texture = 0;
+    if (m_diffuseTexture != 0) {
+        glDeleteTextures(1, &m_diffuseTexture);
+        m_diffuseTexture = 0;
+    }
+    if (m_specularTexture != 0) {
+        glDeleteTextures(1, &m_specularTexture);
+        m_specularTexture = 0;
     }
 }
 

@@ -10,14 +10,6 @@ enum class USER_INPUT : uint8_t {
     NO_INPUT
 };
 
-enum MODEL_EXPORT_TYPE : uint8_t {
-    OBJ,
-    GLTF,
-    FBX,
-};
-
-std::string getExportTypeString(MODEL_EXPORT_TYPE exportType);
-
 class ModelLoader {
   public:
     ModelLoader();
@@ -28,9 +20,10 @@ class ModelLoader {
     [[nodiscard]] const std::vector<std::string> FindTexture(const std::string& modelPath) const;
 
   private:
+    MaterialSelection m_materialSelection;
     std::unique_ptr<Model> m_model;
-    uint32_t m_texture;
+    uint32_t m_diffuseTexture;
+    uint32_t m_specularTexture;
     USER_INPUT m_waitingForUserInput = USER_INPUT::NO_INPUT;
     std::vector<std::string> m_texturePaths;
-    std::optional<MODEL_EXPORT_TYPE> m_lastExportType;
 };

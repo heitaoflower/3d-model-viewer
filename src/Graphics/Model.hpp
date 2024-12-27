@@ -23,14 +23,21 @@ class Model {
                                                         aiTextureType type,
                                                         std::string typeName); // Získání Textur
     glm::mat4 m_model;
+    int32_t m_specularTex;
+    int32_t m_diffuseTex;
 
   public:
     Model(const std::string& directoryPath,
           bool manualySetTextures = false); // Konstruktor s cestou k modelu jako argument
     void DrawArrays() const;
-    void OverwriteTexture(uint32_t texture);
+
+    void OverwriteTexture(int32_t texture);
     void OverwriteColor(glm::vec3 color);
+    void SetSpecularTex(int32_t specularTex);
+    void SetDiffuseTex(int32_t diffuseTex);
     [[nodiscard]] uint32_t GetVerticesCount() const;
+    [[nodiscard]] int32_t GetSpecularTex() const;
+    [[nodiscard]] int32_t GetDiffuseTex() const;
     [[nodiscard]] uint32_t GetIndicesCount() const;
     [[nodiscard]] const glm::vec4 GetColor() const;
     [[nodiscard]] const std::string& GetDirectoryPath() const;

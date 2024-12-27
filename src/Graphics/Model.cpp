@@ -2,7 +2,9 @@
 
 #include <utility>
 
-Model::Model(const std::string& directoryPath, bool manualySetTextures) {
+Model::Model(const std::string& directoryPath, bool manualySetTextures)
+    : m_specularTex(0)
+    , m_diffuseTex(0) {
     m_directoryPath = directoryPath;
     m_manualySetTextures = manualySetTextures;
     Model::LoadModel(directoryPath);
@@ -13,6 +15,22 @@ Model::Model(const std::string& directoryPath, bool manualySetTextures) {
 void Model::DrawArrays() const {
     for (const auto& m_meshe : m_meshes) // Každý mesh ve vectoru vykreslit
         m_meshe.DrawArrays();
+}
+
+void Model::SetSpecularTex(int32_t specularTex) {
+    m_specularTex = specularTex;
+}
+
+int32_t Model::GetDiffuseTex() const {
+    return m_diffuseTex;
+}
+
+void Model::SetDiffuseTex(int32_t diffuseTex) {
+    m_diffuseTex = diffuseTex;
+}
+
+int32_t Model::GetSpecularTex() const {
+    return m_specularTex;
 }
 
 void Model::LoadModel(const std::string& directoryPath) {
@@ -116,11 +134,12 @@ Mesh Model::ProcessMesh(aiMesh* mesh,
     return { vertices, indices, textures }; // Vrátí celý jeden Mesh
 }
 
-void Model::OverwriteTexture(uint32_t texture) {
+void Model::OverwriteTexture(int32_t texture) {
     m_loadedTextures.clear();
     m_loadedTexturesPaths.clear();
     m_loadedTextures.push_back({ texture, "diffuse", "" });
     m_manualySetTextures = true;
+    m_diffuseTex = texture;
 }
 
 const std::string& Model::GetDirectoryPath() const {
