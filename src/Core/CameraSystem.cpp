@@ -24,9 +24,9 @@ void CameraSystem::SetProjMatToOrtho() {
     }
 }
 
-void CameraSystem::SetProjMatToPerspective(const glm::vec2 viewportSize) {
+void CameraSystem::SetProjMatToPerspective() {
     if (m_activeCamera == Cameras::ARCBALL) {
-        m_orbitalCamera.SetProjMatToPerspective(viewportSize);
+        m_orbitalCamera.SetProjMatToPerspective();
     }
 }
 

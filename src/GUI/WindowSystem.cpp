@@ -21,23 +21,35 @@ InputData::InputData(glm::vec3 modelPos,
     , m_modelScale(modelScale)
     , m_modelRotAngle(modelRotAngle)
     , m_allowCameraInput(allowCameraInput)
-    , m_isLightShaderActive(true)
+    , m_lightShaderActive(true)
+    , m_simpleShaderActive(false)
+    , m_reflectShaderActive(false)
     , m_lightIntensity(0.5f)
     , m_wireframeMode(false)
     , m_materialShininess(32.0f)
-    , m_lightPos(1.2f, 1.0f, 2.0f) {
+    , m_lightPos(1.2f, 1.0f, 2.0f)
+    , m_skyboxActive(true) {
     model = glm::mat4(1.0f);
     model = glm::translate(model, modelPos);
     model = glm::rotate(model, glm::radians(modelRotAngle), modelRot);
     model = glm::scale(model, modelScale);
 }
 
+bool InputData::GetSkyboxActive() const {
+    return m_skyboxActive;
+}
+
 bool InputData::GetAllowCameraInput() const {
     return m_allowCameraInput;
 }
 
-bool InputData::GetIsLightShaderActive() const {
-    return m_isLightShaderActive;
+Shaders InputData::GetActiveShader() const {
+    if (m_lightShaderActive)
+        return Shaders::LIGHT;
+    else if (m_simpleShaderActive)
+        return Shaders::SIMPLE;
+    else
+        return Shaders::REFLECT;
 }
 
 float InputData::GetLightIntensity() const {
@@ -241,8 +253,46 @@ void WindowSystem::RenderTextureErrorWindow() {
 
 void WindowSystem::RenderShaderSettings() {
     ImGui::Text("Nastavení shaderu");
-    ImGui::Checkbox("Povolit jednoduché stínování", &m_inputData.m_isLightShaderActive);
-    if (!m_inputData.m_isLightShaderActive) {
+    int shaderType = 0;
+    if (m_inputData.m_simpleShaderActive)
+        shaderType = 0;
+    if (m_inputData.m_lightShaderActive)
+        shaderType = 1;
+    if (m_inputData.m_reflectShaderActive)
+        shaderType = 2;
+
+    if (ImGui::RadioButton("Jednoduchý shader", shaderType == 0)) {
+        shaderType = 0;
+    }
+    if (ImGui::RadioButton("Light shader", shaderType == 1)) {
+        shaderType = 1;
+    }
+
+    if (!m_inputData.m_skyboxActive)
+        ImGui::BeginDisabled();
+
+    if (ImGui::RadioButton("Reflect shader", shaderType == 2)) {
+        shaderType = 2;
+    }
+
+    if (!m_inputData.m_skyboxActive)
+        ImGui::EndDisabled();
+
+    m_inputData.m_simpleShaderActive = (shaderType == 0);
+    m_inputData.m_lightShaderActive = (shaderType == 1);
+    m_inputData.m_reflectShaderActive = (shaderType == 2);
+
+    if (m_inputData.m_reflectShaderActive) {
+        ImGui::BeginDisabled();
+    }
+
+    ImGui::Checkbox("Zobrazit skybox", &m_inputData.m_skyboxActive);
+
+    if (m_inputData.m_reflectShaderActive) {
+        ImGui::EndDisabled();
+    }
+
+    if (!m_inputData.m_lightShaderActive) {
         ImGui::BeginDisabled();
     }
 
@@ -250,7 +300,7 @@ void WindowSystem::RenderShaderSettings() {
     ImGui::SliderFloat("Lesklost materiálu", &m_inputData.m_materialShininess, 0.0f, 256.0f);
     ImGui::InputFloat3("Pozice světla", glm::value_ptr(m_inputData.m_lightPos));
 
-    if (!m_inputData.m_isLightShaderActive) {
+    if (!m_inputData.m_lightShaderActive) {
         ImGui::EndDisabled();
     }
 
@@ -421,7 +471,7 @@ void WindowSystem::RenderCameraSettings() {
 
 void WindowSystem::ApplyGuiData() {
     if (m_cameraSettings.projectionType == 2) {
-        CameraSystem::GetInstance().SetProjMatToPerspective(s_viewportWinSize);
+        CameraSystem::GetInstance().SetProjMatToPerspective();
     }
     else if (m_cameraSettings.projectionType == 3) {
         CameraSystem::GetInstance().SetProjMatToOrtho();

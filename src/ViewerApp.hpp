@@ -43,8 +43,9 @@ inline void ViewerApp::Run(const std::string& initialModelPath) {
         modelLoader.LoadSelectedModel();
 
         modelLoader.RenderSelectedModel(inputData);
-        // Renderer::GetInstance().RenderSkybox();
-        Renderer::GetInstance().SetLightShaderActive(inputData.GetIsLightShaderActive());
+        if (inputData.GetSkyboxActive())
+          Renderer::GetInstance().RenderSkybox();
+        Renderer::GetInstance().SetActiveShader(inputData.GetActiveShader());
         Renderer::GetInstance().SetLightIntensity(inputData.GetLightIntensity());
         Renderer::GetInstance().SetWireframeMode(inputData.GetWireframeMode());
         windowsSystem.ApplyGuiData();

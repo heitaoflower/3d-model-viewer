@@ -22,7 +22,7 @@ class CameraSystem {
     void UpdateInput();                                  // Aktualizuje vstupní data klávesnice
     void SetFov(const float fov);
     void SetProjMatToOrtho();
-    void SetProjMatToPerspective(const glm::vec2 viewportSize);
+    void SetProjMatToPerspective();
     CameraSystem(const CameraSystem&) = delete;
     CameraSystem& operator=(const CameraSystem&) = delete;
     CameraSystem(CameraSystem&&) = delete;

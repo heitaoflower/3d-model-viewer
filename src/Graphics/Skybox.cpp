@@ -9,9 +9,9 @@ Skybox::Skybox(const std::vector<std::string>& cubemapTextures) {
 
 Skybox::Skybox(const std::string& folderDirectoryPath, const std::string& fileFormat) {
     std::vector<std::string> cubemapsTextures {
-        folderDirectoryPath + "/right" + fileFormat, folderDirectoryPath + "/left" + fileFormat,
-        folderDirectoryPath + "/top" + fileFormat,   folderDirectoryPath + "/bottom" + fileFormat,
-        folderDirectoryPath + "/front" + fileFormat, folderDirectoryPath + "/back" + fileFormat
+        folderDirectoryPath + "/right" + fileFormat,  folderDirectoryPath + "/left" + fileFormat,
+        folderDirectoryPath + "/bottom" + fileFormat, folderDirectoryPath + "/top" + fileFormat,
+        folderDirectoryPath + "/front" + fileFormat,  folderDirectoryPath + "/back" + fileFormat
     };
 
     m_cubemapTextures = cubemapsTextures;
@@ -30,7 +30,7 @@ uint32_t Skybox::LoadTextureFromFile(std::vector<std::string> cubemapTextures) {
 
     int width, height, colorChannels;
     unsigned char* data = nullptr;
-    stbi_set_flip_vertically_on_load(false);
+    stbi_set_flip_vertically_on_load(true);
 
     for (unsigned int i = 0; i < cubemapTextures.size(); i++) {
 
@@ -73,7 +73,7 @@ uint32_t Skybox::LoadTextureFromFile(std::vector<std::string> cubemapTextures) {
 }
 
 void Skybox::CreateCube() {
-    float vertices[108] = { // positions
+    float vertices[108] = { // cubemap vertices positions
                             -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
                             1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f,
 
@@ -101,7 +101,7 @@ void Skybox::CreateCube() {
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)nullptr);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

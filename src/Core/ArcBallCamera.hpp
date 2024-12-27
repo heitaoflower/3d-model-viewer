@@ -8,6 +8,7 @@
 class ArcBallCamera {
   public:
     ArcBallCamera();
+    ~ArcBallCamera() = default;
     void ProcessMouseInput(float definedXPos, float definedYPos);
     void RotateAzimuth(const float radians);
     void RotatePolar(const float radians);
@@ -21,7 +22,7 @@ class ArcBallCamera {
     void SetFar(const float far);
 
     void SetProjMatToOrtho();
-    void SetProjMatToPerspective(const glm::vec2 viewportSize);
+    void SetProjMatToPerspective();
 
     const glm::mat4 GetProjecionMatrix(const glm::vec2 viewportSize);
     [[nodiscard]] const glm::mat4 GetViewMatrix() const;

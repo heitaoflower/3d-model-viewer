@@ -74,7 +74,7 @@ void ArcBallCamera::RotateAzimuth(const float radians) {
     m_azimuthAngle += radians;
 
     const auto fullCircle = 2.0f * glm::pi<double>();
-    m_azimuthAngle = fmodf(m_azimuthAngle, static_cast<int32_t>(fullCircle));
+    m_azimuthAngle = fmodf(m_azimuthAngle, fullCircle);
     if (m_azimuthAngle < 0.0f) {
         m_azimuthAngle = fullCircle + m_azimuthAngle;
     }
@@ -131,7 +131,7 @@ void ArcBallCamera::SetProjMatToOrtho() {
     m_projectionMatrix = std::nullopt;
 }
 
-void ArcBallCamera::SetProjMatToPerspective(const glm::vec2  /*viewportSize*/) {
+void ArcBallCamera::SetProjMatToPerspective() {
     m_isOrtho = false;
     m_projectionMatrix = std::nullopt;
 }

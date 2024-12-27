@@ -10,6 +10,8 @@
 #include <vector>
 #include "../constants.hpp"
 
+enum class Shaders : uint8_t;
+
 struct InputData {
   private:
     glm::vec3 m_modelPos;
@@ -17,12 +19,16 @@ struct InputData {
     glm::vec3 m_modelScale;
     float m_modelRotAngle;
     bool m_allowCameraInput;
-    bool m_isLightShaderActive;
+    bool m_lightShaderActive;
+    bool m_simpleShaderActive;
+    bool m_reflectShaderActive;
+
     float m_lightIntensity;
     bool m_wireframeMode;
     glm::mat4 model;
     float m_materialShininess;
     glm::vec3 m_lightPos;
+    bool m_skyboxActive;
 
   public:
     InputData(glm::vec3 modelPos,
@@ -32,11 +38,12 @@ struct InputData {
               bool allowCameraInput);
     [[nodiscard]] const glm::mat4 GetModelMatrix() const;
     [[nodiscard]] bool GetAllowCameraInput() const;
-    [[nodiscard]] bool GetIsLightShaderActive() const;
     [[nodiscard]] float GetLightIntensity() const;
     [[nodiscard]] bool GetWireframeMode() const;
     [[nodiscard]] glm::vec3 GetLightPos() const;
     [[nodiscard]] float GetMaterialShininess() const;
+    [[nodiscard]] bool GetSkyboxActive() const;
+    [[nodiscard]] Shaders GetActiveShader() const;
     friend class WindowSystem;
 };
 
@@ -54,13 +61,19 @@ class WindowSystem {
     InputData GetInputData();
     void ApplyGuiData();
     static const glm::vec2 GetViewportWinSize();
+
     static std::optional<std::filesystem::path> s_modelPath;
+
     static bool s_flipTexture;
-    static const std::optional<std::string> RenderTexturesDialog(std::vector<std::string>& textures);
+
+    static const std::optional<std::string> RenderTexturesDialog(
+        std::vector<std::string>& textures);
+
     static const std::optional<glm::vec3> RenderModelColorPicker();
 
   private:
     static glm::vec2 s_viewportWinSize;
+    
     inline void RenderPositionsWidgets();
     inline void RenderClearColorPicker();
     inline void RenderModelInfo();
