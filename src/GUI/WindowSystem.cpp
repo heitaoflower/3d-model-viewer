@@ -12,80 +12,12 @@ bool WindowSystem::s_flipTexture = false;
 bool WindowSystem::s_showTextureErrorWindow = false;
 bool WindowSystem::s_showModelErrorWindow = false;
 
-InputData::InputData(glm::vec3 modelPos,
-                     glm::vec3 modelRot,
-                     glm::vec3 modelScale,
-                     float modelRotAngle,
-                     bool allowCameraInput)
-    : m_modelPos(modelPos)
-    , m_modelRot(modelRot)
-    , m_modelScale(modelScale)
-    , m_modelRotAngle(modelRotAngle)
-    , m_allowCameraInput(allowCameraInput)
-    , m_lightShaderActive(true)
-    , m_simpleShaderActive(false)
-    , m_reflectShaderActive(false)
-    , m_lightIntensity(0.5f)
-    , m_wireframeMode(false)
-    , m_materialShininess(32.0f)
-    , m_lightPos(1.2f, 1.0f, 2.0f)
-    , m_skyboxActive(true) {
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, modelPos);
-    model = glm::rotate(model, glm::radians(modelRotAngle), modelRot);
-    model = glm::scale(model, modelScale);
-}
-
-bool InputData::GetSkyboxActive() const {
-    return m_skyboxActive;
-}
-
-bool InputData::GetAllowCameraInput() const {
-    return m_allowCameraInput;
-}
-
-Shaders InputData::GetActiveShader() const {
-    if (m_lightShaderActive)
-        return Shaders::LIGHT;
-    else if (m_simpleShaderActive)
-        return Shaders::SIMPLE;
-    else
-        return Shaders::REFLECT;
-}
-
-float InputData::GetLightIntensity() const {
-    return m_lightIntensity;
-}
-
-bool InputData::GetWireframeMode() const {
-    return m_wireframeMode;
-}
-
-glm::vec3 InputData::GetLightPos() const {
-    return m_lightPos;
-}
-
-float InputData::GetMaterialShininess() const {
-    return m_materialShininess;
-}
-
-const glm::mat4 InputData::GetModelMatrix() const {
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 1.0f));
-
-    return scaleMatrix * model;
-}
-
-CameraSettings::CameraSettings() noexcept
-    : cameraType(0)
-    , projectionType(2)
-    , zoomMultiplier(1.f) {}
 
 WindowSystem::WindowSystem()
     : m_inputData(glm::vec3(2.f, 0.f, -5.f), glm::vec3(1.0f), glm::vec3(1.0f), 0.0f, true)
     , m_gizmoOperation(ImGuizmo::TRANSLATE)
     , m_renderGizmo(false)
     , m_gizmoSizeMultiplier(1.0f) {
-
     SetGuiStyle();
     s_viewportWinSize = glm::vec2(uint32_t(500), uint32_t(500));
 }
@@ -108,7 +40,7 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
         s_viewportWinSize = glm::vec2((uint16_t)winSize.x, (uint16_t)winSize.y);
 
     if (isObjectRendered)
-        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(Core::GetRenderTargetTexture())),
+        ImGui::Image(static_cast<ImTextureID>(Core::GetRenderTargetTexture()),
                      ImVec2(s_viewportWinSize.x, s_viewportWinSize.y));
     else {
         float windowWidth = ImGui::GetWindowSize().x;

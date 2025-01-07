@@ -1,17 +1,16 @@
 ﻿#include "ImguiRendering.hpp"
+#include "../AssetManager.hpp"
 
 void ImguiRendering::InitImgui(GLFWwindow* window) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    const std::string fontPath
-        = std::string(GLOBAL_PATH)
-          + std::string("/home/dominik/Projekty/3d-model-viewer/res/font.ttf");
+    const std::string fontPath = AssetManager::GetAssetPath(Assets::UI_FONT).string();
     std::cout << "Font path: " << fontPath << '\n';
     // Vytvoříme si instanci ImGuiIO
     ImGuiIO& io = ImGui::GetIO();
     ImVector<ImWchar> ranges;
     ImFontGlyphRangesBuilder builder;
-    builder.AddText("áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ");  // Přidáme řetězec
+    builder.AddText("áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ");    // Přidáme řetězec
     builder.AddRanges(io.Fonts->GetGlyphRangesDefault()); // Přidáme jednu z výchozích sad
     builder.BuildRanges(&ranges); // Sestavíme výsledný výsledek (seřazené sady
                                   // se všemi jedinečnými znaky)

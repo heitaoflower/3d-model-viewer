@@ -44,7 +44,7 @@ inline void ViewerApp::Run(const std::string& initialModelPath) {
 
         modelLoader.RenderSelectedModel(inputData);
         if (inputData.GetSkyboxActive())
-          Renderer::GetInstance().RenderSkybox();
+            Renderer::GetInstance().RenderAdditional();
         Renderer::GetInstance().SetActiveShader(inputData.GetActiveShader());
         Renderer::GetInstance().SetLightIntensity(inputData.GetLightIntensity());
         Renderer::GetInstance().SetWireframeMode(inputData.GetWireframeMode());
