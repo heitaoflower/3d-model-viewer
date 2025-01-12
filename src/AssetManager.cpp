@@ -25,6 +25,10 @@ const std::filesystem::path AssetManager::GetAssetPath(Assets asset) {
         return s_assetsFolder / "font.ttf";
     case Assets::WINDOW_ICON:
         return s_assetsFolder / "icon.png";
+    case Assets::ENGLISH_LOCALE:
+        return s_assetsFolder / "locale" / "en.loc";
+    case Assets::CZECH_LOCALE:
+        return s_assetsFolder / "locale" / "cs.loc";
     default:
         PANIC("Asset not found");
         return "";

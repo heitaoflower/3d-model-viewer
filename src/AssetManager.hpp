@@ -18,7 +18,11 @@ enum class Assets : uint8_t {
     UI_FONT,
 
     // Icons
-    WINDOW_ICON
+    WINDOW_ICON,
+
+    // Locale
+    ENGLISH_LOCALE,
+    CZECH_LOCALE
 };
 
 class AssetManager {

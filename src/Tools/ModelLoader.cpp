@@ -42,7 +42,7 @@ void ModelLoader::RenderSelectedModel(InputData inputData) {
             m_specularTexture = 0;
         }
 
-        bool selected = WindowSystem::RenderTexturesDialog(m_materialSelection, m_texturePaths);
+        bool selected = WindowSystem::RenderMaterialDialog(m_materialSelection, m_texturePaths);
 
         // Kontrola, zda všechny cesty obsahují podporovanou příponu textur
         if (selected) {

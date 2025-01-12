@@ -10,7 +10,7 @@
 #include <optional>
 #include <vector>
 #include "../constants.hpp"
-
+#include "../Locale/Locale.hpp"
 
 struct MaterialSelection {
     std::optional<std::string> diffuse;
@@ -19,7 +19,6 @@ struct MaterialSelection {
     MaterialSelection(std::optional<std::string> diffuse, std::optional<std::string> specular);
     MaterialSelection();
 };
-
 
 class WindowSystem {
   public:
@@ -33,14 +32,15 @@ class WindowSystem {
 
     static bool s_flipTexture;
 
-    static bool RenderTexturesDialog(MaterialSelection& materialSelection,
+    static bool RenderMaterialDialog(MaterialSelection& materialSelection,
                                      std::vector<std::string>& textures);
 
     static const std::optional<glm::vec3> RenderModelColorPicker();
 
   private:
     static glm::vec2 s_viewportWinSize;
-
+    static Language s_currentLanguage;
+    inline void RenderApplicationSettings();
     inline void RenderPositionsWidgets();
     inline void RenderClearColorPicker();
     inline void RenderModelInfo();
@@ -57,5 +57,6 @@ class WindowSystem {
     bool m_renderGizmo;
     float m_gizmoSizeMultiplier;
     static bool s_showModelErrorWindow;
+    static bool s_showApplicationSettings;
     static bool s_showTextureErrorWindow;
 };
