@@ -7,7 +7,7 @@
 #include "../AssetManager.hpp"
 #include "../Tools/Log.hpp"
 
-Language Locale::s_currentLanguage = Language::ENGLISH;
+Language Locale::s_currentLanguage = Language::CZECH;
 std::vector<std::string> Locale::s_localeKeys = {};
 
 void Locale::SetLanguage(Language language) {

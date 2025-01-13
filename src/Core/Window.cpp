@@ -1,11 +1,14 @@
 ﻿#include "Window.hpp"
 #include "CameraSystem.hpp"
+#include "stb_image.h"
+#include "../AssetManager.hpp"
 
 GLFWwindow* Window::s_window = nullptr;
 Display* Window::s_display = nullptr;
 bool Window::s_isCursorVisible = true;
 bool Window::s_isFullscreenEnabled = false;
 bool Window::s_Vsync = false;
+GLFWimage* Window::s_icon = nullptr;
 uint32_t Window::s_windowHeight = 720;
 uint32_t Window::s_windowWidth = 1280;
 
@@ -13,7 +16,7 @@ void mouse_callback(GLFWwindow* /*window*/, double xpos, double ypos) {
     CameraSystem::GetInstance().ProcessMouseInput(xpos, ypos);
 }
 
-void scroll_callback(GLFWwindow* /*window*/, double  /*xoffset*/, double yoffset) {
+void scroll_callback(GLFWwindow* /*window*/, double /*xoffset*/, double yoffset) {
     CameraSystem::GetInstance().ProcessMouseScrollInput(yoffset);
 }
 
@@ -64,16 +67,19 @@ bool Window::InitWindow(const uint32_t windowWidth,
     glfwSetCursorPosCallback(s_window, mouse_callback);
     glfwSetScrollCallback(s_window, scroll_callback);
 
-    // GLFWimage images[1];
-    // images[0].pixels =
-    //     stbi_load((std::string(GLOBAL_PATH) + "res/icon.png").c_str(),
-    //               &images[0].width, &images[0].height, 0, 4);
-    // glfwSetWindowIcon(s_window, 1, &images[0]);
-    // stbi_image_free(images[0].pixels);
     glfwSetFramebufferSizeCallback(s_window, framebuffer_size_callback);
 
     Core::InitEngine();
 
+    GLFWimage images[1];
+    images[0].pixels = stbi_load(AssetManager::GetAssetPath(Assets::WINDOW_ICON).c_str(),
+                                 &images[0].width,
+                                 &images[0].height,
+                                 nullptr,
+                                 4);
+
+    glfwSetWindowIcon(s_window, 1, images);
+    stbi_image_free(images[0].pixels);
     ImguiRendering::InitImgui(s_window);
 
     return true;
@@ -141,7 +147,7 @@ GLFWwindow* Window::GetGLFWwindowRef() {
     return s_window;
 }
 
-void framebuffer_size_callback(GLFWwindow*  /*window*/, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* /*window*/, int width, int height) {
     int _height, _width;
 
     if (width != Window::GetWindowWidth() || height != Window::GetWindowHeight()) {

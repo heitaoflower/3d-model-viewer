@@ -6,7 +6,6 @@
 
 enum class USER_INPUT : uint8_t {
     TEXTURE_SELECTION,
-    COLOR_SELECTION,
     NO_INPUT
 };
 

@@ -5,6 +5,7 @@
 #include "GuiStyle.hpp"
 #include <ranges>
 #include <utility>
+#include <variant>
 
 glm::vec2 WindowSystem::s_viewportWinSize = glm::vec2(-1.0f);
 std::optional<std::filesystem::path> WindowSystem::s_modelPath = std::nullopt;
@@ -12,6 +13,7 @@ bool WindowSystem::s_flipTexture = false;
 bool WindowSystem::s_showTextureErrorWindow = false;
 bool WindowSystem::s_showModelErrorWindow = false;
 bool WindowSystem::s_showApplicationSettings = false;
+bool WindowSystem::s_isDiffuseTexture = true;
 Language WindowSystem::s_currentLanguage = Language::CZECH;
 
 WindowSystem::WindowSystem()
@@ -24,20 +26,24 @@ WindowSystem::WindowSystem()
 }
 
 void WindowSystem::RenderApplicationSettings() {
-    if (ImGui::Begin("Application Settings",
+    ImVec2 windowSize(400, 200);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
+    if (ImGui::Begin(Locale::GetText(LocaleKey::SETTINGS),
                      nullptr,
-                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize)) {
+                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
 
         if (ImGui::BeginTabBar("SettingsTabs")) {
 
-            if (ImGui::BeginTabItem("Display")) {
-                ImGui::Text("Display settings go here.");
+            if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::LANGUAGE))) {
+                ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_LANGUAGE));
 
-                if (ImGui::RadioButton("Czech", s_currentLanguage == Language::CZECH)) {
+                if (ImGui::RadioButton(Locale::GetText(LocaleKey::CZECH),
+                                       s_currentLanguage == Language::CZECH)) {
                     s_currentLanguage = Language::CZECH;
                     Locale::SetLanguage(s_currentLanguage);
                 }
-                if (ImGui::RadioButton("English", s_currentLanguage == Language::ENGLISH)) {
+                if (ImGui::RadioButton(Locale::GetText(LocaleKey::ENGLISH),
+                                       s_currentLanguage == Language::ENGLISH)) {
                     s_currentLanguage = Language::ENGLISH;
                     Locale::SetLanguage(s_currentLanguage);
                 }
@@ -45,9 +51,7 @@ void WindowSystem::RenderApplicationSettings() {
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Language")) {
-                ImGui::Text("Audio settings go here.");
-                // Add your audio settings UI elements here
+            if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::DISPLAY))) {
                 ImGui::EndTabItem();
             }
 
@@ -56,8 +60,8 @@ void WindowSystem::RenderApplicationSettings() {
 
         ImGui::Separator();
         float windowWidth = ImGui::GetWindowSize().x;
-        float buttonWidth
-            = ImGui::CalcTextSize(Locale::GetText(LocaleKey::CLOSE)).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+        float buttonWidth = ImGui::CalcTextSize(Locale::GetText(LocaleKey::CLOSE)).x
+                            + ImGui::GetStyle().FramePadding.x * 2.0f;
         ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
 
         if (ImGui::Button(Locale::GetText(LocaleKey::CLOSE), ImVec2(buttonWidth, 0))) {
@@ -97,14 +101,14 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
 
         ImGui::SetCursorPos(
             ImVec2((windowWidth - textWidth) / 2.0f, (windowHeight - textHeight) / 2.0f - 60.f));
-        ImGui::Text(Locale::GetText(LocaleKey::NO_MODEL_LOADED));
+        ImGui::Text("%s", Locale::GetText(LocaleKey::NO_MODEL_LOADED));
 
         textWidth = ImGui::CalcTextSize(Locale::GetText(LocaleKey::OPEN_MODEL_WITH_FILE_MENU)).x;
         textHeight = ImGui::CalcTextSize(Locale::GetText(LocaleKey::OPEN_MODEL_WITH_FILE_MENU)).y;
 
         ImGui::SetCursorPos(
             ImVec2((windowWidth - textWidth) / 2.0f, (windowHeight - textHeight) / 2.0f - 30.f));
-        ImGui::Text(Locale::GetText(LocaleKey::OPEN_MODEL_WITH_FILE_MENU));
+        ImGui::Text("%s", Locale::GetText(LocaleKey::OPEN_MODEL_WITH_FILE_MENU));
 
         ImGui::Dummy(ImVec2(0, 10));
         ImGui::Separator();
@@ -202,7 +206,7 @@ void WindowSystem::RenderModelErrorWindow() {
                                    nullptr,
                                    ImGuiWindowFlags_AlwaysAutoResize
                                        | ImGuiWindowFlags_NoCollapse)) {
-            ImGui::Text(Locale::GetText(LocaleKey::FILE_EXTENSION_NOT_SUPPORTED));
+            ImGui::Text("%s", Locale::GetText(LocaleKey::FILE_EXTENSION_NOT_SUPPORTED));
             ImGui::Separator();
 
             if (ImGui::Button(Locale::GetText(LocaleKey::OK), ImVec2(120, 0))) {
@@ -222,7 +226,7 @@ void WindowSystem::RenderTextureErrorWindow() {
                 Locale::GetText(LocaleKey::CHOOSED_TEXTURE_HAS_UNKNOWN_EXTENSION),
                 nullptr,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse)) {
-            ImGui::Text(Locale::GetText(LocaleKey::CHOOSED_TEXTURE_HAS_UNKNOWN_EXTENSION));
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSED_TEXTURE_HAS_UNKNOWN_EXTENSION));
             ImGui::Separator();
 
             if (ImGui::Button(Locale::GetText(LocaleKey::OK), ImVec2(120, 0))) {
@@ -235,7 +239,7 @@ void WindowSystem::RenderTextureErrorWindow() {
 }
 
 void WindowSystem::RenderShaderSettings() {
-    ImGui::Text(Locale::GetText(LocaleKey::SHADER_SETTINGS));
+    ImGui::Text("%s", Locale::GetText(LocaleKey::SHADER_SETTINGS));
     int shaderType = 0;
     if (m_inputData.m_simpleShaderActive)
         shaderType = 0;
@@ -325,8 +329,9 @@ ImVec2 WindowSystem::RenderMainMenuBar(bool isObjectRendered) {
 
         if (m_cameraSettings.cameraType == 1) {
             ImGui::Separator();
-            ImGui::Text(Locale::GetText(LocaleKey::MOVE_CAMERA_USING_WASD));
-            ImGui::Text(Locale::GetText(LocaleKey::FOR_UNLOCK_CURSOR_PRESS_F2_FOR_LOCK_PRESS_F1));
+            ImGui::Text("%s", Locale::GetText(LocaleKey::MOVE_CAMERA_USING_WASD));
+            ImGui::Text("%s",
+                        Locale::GetText(LocaleKey::FOR_UNLOCK_CURSOR_PRESS_F2_FOR_LOCK_PRESS_F1));
         }
 
         ImGui::EndMainMenuBar();
@@ -342,7 +347,7 @@ void WindowSystem::RenderClearColorPicker() {
 
 void WindowSystem::RenderModelInfo() {
     ImGui::Separator();
-    ImGui::Text(Locale::GetText(LocaleKey::MODEL_INFO));
+    ImGui::Text("%s", Locale::GetText(LocaleKey::MODEL_INFO));
     ImGui::Text((std::string(Locale::GetText(LocaleKey::VERTEX_COUNT)) + std::string("%d")).c_str(),
                 Renderer::GetInstance().GetVerticesCount());
     ImGui::Text((std::string(Locale::GetText(LocaleKey::INDEX_COUNT)) + std::string("%d")).c_str(),
@@ -350,7 +355,7 @@ void WindowSystem::RenderModelInfo() {
     ImGui::Separator();
 }
 
-MaterialSelection::MaterialSelection(std::optional<std::string> diffuse,
+MaterialSelection::MaterialSelection(std::variant<std::string, glm::vec3> diffuse,
                                      std::optional<std::string> specular) {
     this->diffuse = std::move(diffuse);
     this->specular = std::move(specular);
@@ -366,16 +371,37 @@ bool WindowSystem::RenderMaterialDialog(MaterialSelection& materialSelection,
         return false;
     }
 
+    ImVec2 windowSize(400, 300);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_FirstUseEver);
+
     ImGui::Begin(Locale::GetText(LocaleKey::AUTOMATIC_TEXTURE_SELECTION),
                  nullptr,
                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
 
+    static ImVec4 color = ImVec4(1.f, 1.f, 1.f, 1.f);
     if (ImGui::BeginTabBar("MaterialTabs")) {
         if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::DIFFUSE))) {
-            ImGui::Text(Locale::GetText(LocaleKey::CHOOSE_DIFFUSE_TEXTURE));
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_DIFFUSE_TEXTURE));
+
+            if (ImGui::RadioButton(Locale::GetText(LocaleKey::DIFFUSE_COLOR),
+                                   s_isDiffuseTexture == 0)) {
+                s_isDiffuseTexture = false;
+            }
+
+            if (ImGui::RadioButton(Locale::GetText(LocaleKey::DIFFUSE_TEXTURE),
+                                   s_isDiffuseTexture == 1)) {
+                s_isDiffuseTexture = true;
+            }
+
+            if (s_isDiffuseTexture == 0)
+                ImGui::BeginDisabled();
 
             for (auto& texture : textures) {
-                bool isSelected = (materialSelection.diffuse == texture);
+                bool isSelected
+                    = materialSelection.diffuse.has_value()
+                      && std::holds_alternative<std::string>(materialSelection.diffuse.value())
+                      && std::get<std::string>(materialSelection.diffuse.value()) == texture;
+
                 if (ImGui::Selectable((texture + " -> Diffuse").c_str(), isSelected)) {
                     materialSelection.diffuse = texture;
                     Log::Info("Diffuse textura: " + texture);
@@ -385,31 +411,16 @@ bool WindowSystem::RenderMaterialDialog(MaterialSelection& materialSelection,
                 }
             }
 
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::SPECULAR))) {
-            ImGui::Text(Locale::GetText(LocaleKey::CHOOSE_SPECULAR_TEXTURE));
-
-            for (auto& texture : textures) {
-                bool isSelected = (materialSelection.specular == texture);
-                if (ImGui::Selectable((texture + " -> Specular").c_str(), isSelected)) {
-                    materialSelection.specular = texture;
-                    Log::Info("Specular textura: " + texture);
-                }
-                if (isSelected) {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::MANUAL_SELECTION))) {
-            ImGui::Text(Locale::GetText(LocaleKey::MANUAL_SELECTION));
+            ImGui::Separator();
             ImGui::Checkbox(Locale::GetText(LocaleKey::FLIP_TEXTURE), &s_flipTexture);
             if (ImGui::Button(Locale::GetText(LocaleKey::CHOOSE_TEXTURE_MANUALLY))) {
                 auto texture = FileDialogManager::GetInstance().InvokeFileDialog();
+                if (texture.empty()) {
+                    ImGui::EndTabItem();
+                    ImGui::EndTabBar();
+                    ImGui::End();
+                    return false;
+                }
                 std::string extension = std::filesystem::path(texture).extension().string();
                 if (std::find(SUPPORTED_TEXTURE_EXTENSIONS.begin(),
                               SUPPORTED_TEXTURE_EXTENSIONS.end(),
@@ -426,13 +437,55 @@ bool WindowSystem::RenderMaterialDialog(MaterialSelection& materialSelection,
                 }
             }
 
+            if (s_isDiffuseTexture == 0)
+                ImGui::EndDisabled();
+
+            if (s_isDiffuseTexture == 1)
+                ImGui::BeginDisabled();
             ImGui::Separator();
-            ImGui::Text(Locale::GetText(LocaleKey::CHOOSE_COLOR_MANUALLY));
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_COLOR_MANUALLY));
 
-            if (ImGui::Button(Locale::GetText(LocaleKey::CHOOSE_MODEL_COLOR))) {
-                materialSelection.diffuse = std::string("");
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_MODEL_COLOR));
+            ImGui::ColorEdit3(Locale::GetText(LocaleKey::MODEL_COLOR), (float*)&color);
+
+            if (s_isDiffuseTexture == 1)
+                ImGui::EndDisabled();
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::SPECULAR))) {
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_SPECULAR_TEXTURE));
+
+            for (auto& texture : textures) {
+                bool isSelected = (materialSelection.specular == texture);
+                if (ImGui::Selectable((texture + " -> Specular").c_str(), isSelected)) {
+                    materialSelection.specular = texture;
+                    Log::Info("Specular textura: " + texture);
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
-
+            ImGui::Separator();
+            ImGui::Checkbox(Locale::GetText(LocaleKey::FLIP_TEXTURE), &s_flipTexture);
+            if (ImGui::Button(Locale::GetText(LocaleKey::CHOOSE_TEXTURE_MANUALLY))) {
+                auto texture = FileDialogManager::GetInstance().InvokeFileDialog();
+                std::string extension = std::filesystem::path(texture).extension().string();
+                if (std::find(SUPPORTED_TEXTURE_EXTENSIONS.begin(),
+                              SUPPORTED_TEXTURE_EXTENSIONS.end(),
+                              extension)
+                    == SUPPORTED_TEXTURE_EXTENSIONS.end()) {
+                    Log::Error("Nepodporovaný formát textury:" + texture);
+                    s_showTextureErrorWindow = true;
+                    ImGui::EndTabBar();
+                    ImGui::End();
+                    return false;
+                }
+                else {
+                    materialSelection.specular = texture;
+                }
+            }
             ImGui::EndTabItem();
         }
 
@@ -442,7 +495,10 @@ bool WindowSystem::RenderMaterialDialog(MaterialSelection& materialSelection,
     ImGui::Separator();
     if (ImGui::Button(Locale::GetText(LocaleKey::APPLY))) {
         ImGui::End();
-        if (!materialSelection.diffuse.has_value()) {
+        if (s_isDiffuseTexture == 0) {
+            materialSelection.diffuse = glm::vec3(color.x, color.y, color.z);
+        }
+        else if (s_isDiffuseTexture == 1 && !materialSelection.diffuse.has_value()) {
             return false;
         }
         return true;
@@ -468,7 +524,7 @@ const std::optional<glm::vec3> WindowSystem::RenderModelColorPicker() {
 }
 
 void WindowSystem::RenderGizmoSettings() {
-    ImGui::Text(Locale::GetText(LocaleKey::GIZMO_SETTINGS));
+    ImGui::Text("%s", Locale::GetText(LocaleKey::GIZMO_SETTINGS));
     ImGui::Checkbox(Locale::GetText(LocaleKey::SHOW_GIZMO), &m_renderGizmo);
     if (!m_renderGizmo) {
         ImGui::BeginDisabled();
@@ -492,7 +548,7 @@ void WindowSystem::RenderGizmoSettings() {
 }
 
 void WindowSystem::RenderCameraSettings() {
-    ImGui::Text(Locale::GetText(LocaleKey::CAMERA_SETTINGS));
+    ImGui::Text("%s", Locale::GetText(LocaleKey::CAMERA_SETTINGS));
     if (ImGui::RadioButton(Locale::GetText(LocaleKey::FREEFLY_CAMERA),
                            m_cameraSettings.cameraType == 1))
         m_cameraSettings.cameraType = 1;

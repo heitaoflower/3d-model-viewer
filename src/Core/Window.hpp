@@ -32,6 +32,7 @@ class Window {
     static bool s_isCursorVisible;
     static bool s_isFullscreenEnabled;
     static GLFWwindow* s_window;
+    static GLFWimage *s_icon;
 
   protected:
     static void OnRenderStart();

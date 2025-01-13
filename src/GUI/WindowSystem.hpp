@@ -8,15 +8,16 @@
 #include <cstdint>
 #include <filesystem>
 #include <optional>
+#include <variant>
 #include <vector>
 #include "../constants.hpp"
 #include "../Locale/Locale.hpp"
 
 struct MaterialSelection {
-    std::optional<std::string> diffuse;
+    std::optional<std::variant<std::string, glm::vec3>> diffuse;
     std::optional<std::string> specular;
 
-    MaterialSelection(std::optional<std::string> diffuse, std::optional<std::string> specular);
+    MaterialSelection(std::variant<std::string, glm::vec3>, std::optional<std::string> specular);
     MaterialSelection();
 };
 
@@ -38,6 +39,7 @@ class WindowSystem {
     static const std::optional<glm::vec3> RenderModelColorPicker();
 
   private:
+    static bool s_isDiffuseTexture;
     static glm::vec2 s_viewportWinSize;
     static Language s_currentLanguage;
     inline void RenderApplicationSettings();

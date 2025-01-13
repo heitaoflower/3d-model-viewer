@@ -18,7 +18,7 @@ FileDialogManager::~FileDialogManager() {
 const std::string FileDialogManager::InvokeFileDialog() {
     nfdchar_t* outPath = nullptr;
     nfdresult_t result = NFD_OpenDialog(&outPath, nullptr, 0, nullptr);
-    std::string path;
+    std::string path = "";
     if (result == NFD_OKAY) {
         path = std::string(outPath);
         free(outPath);
