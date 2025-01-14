@@ -5,95 +5,77 @@
 #include "GuiStyle.hpp"
 #include <ranges>
 #include <utility>
+#include <variant>
 
 glm::vec2 WindowSystem::s_viewportWinSize = glm::vec2(-1.0f);
 std::optional<std::filesystem::path> WindowSystem::s_modelPath = std::nullopt;
 bool WindowSystem::s_flipTexture = false;
 bool WindowSystem::s_showTextureErrorWindow = false;
 bool WindowSystem::s_showModelErrorWindow = false;
-
-InputData::InputData(glm::vec3 modelPos,
-                     glm::vec3 modelRot,
-                     glm::vec3 modelScale,
-                     float modelRotAngle,
-                     bool allowCameraInput)
-    : m_modelPos(modelPos)
-    , m_modelRot(modelRot)
-    , m_modelScale(modelScale)
-    , m_modelRotAngle(modelRotAngle)
-    , m_allowCameraInput(allowCameraInput)
-    , m_lightShaderActive(true)
-    , m_simpleShaderActive(false)
-    , m_reflectShaderActive(false)
-    , m_lightIntensity(0.5f)
-    , m_wireframeMode(false)
-    , m_materialShininess(32.0f)
-    , m_lightPos(1.2f, 1.0f, 2.0f)
-    , m_skyboxActive(true) {
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, modelPos);
-    model = glm::rotate(model, glm::radians(modelRotAngle), modelRot);
-    model = glm::scale(model, modelScale);
-}
-
-bool InputData::GetSkyboxActive() const {
-    return m_skyboxActive;
-}
-
-bool InputData::GetAllowCameraInput() const {
-    return m_allowCameraInput;
-}
-
-Shaders InputData::GetActiveShader() const {
-    if (m_lightShaderActive)
-        return Shaders::LIGHT;
-    else if (m_simpleShaderActive)
-        return Shaders::SIMPLE;
-    else
-        return Shaders::REFLECT;
-}
-
-float InputData::GetLightIntensity() const {
-    return m_lightIntensity;
-}
-
-bool InputData::GetWireframeMode() const {
-    return m_wireframeMode;
-}
-
-glm::vec3 InputData::GetLightPos() const {
-    return m_lightPos;
-}
-
-float InputData::GetMaterialShininess() const {
-    return m_materialShininess;
-}
-
-const glm::mat4 InputData::GetModelMatrix() const {
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 1.0f));
-
-    return scaleMatrix * model;
-}
-
-CameraSettings::CameraSettings() noexcept
-    : cameraType(0)
-    , projectionType(2)
-    , zoomMultiplier(1.f) {}
+bool WindowSystem::s_showApplicationSettings = false;
+bool WindowSystem::s_isDiffuseTexture = true;
+Language WindowSystem::s_currentLanguage = Language::CZECH;
 
 WindowSystem::WindowSystem()
     : m_inputData(glm::vec3(2.f, 0.f, -5.f), glm::vec3(1.0f), glm::vec3(1.0f), 0.0f, true)
     , m_gizmoOperation(ImGuizmo::TRANSLATE)
     , m_renderGizmo(false)
     , m_gizmoSizeMultiplier(1.0f) {
-
     SetGuiStyle();
     s_viewportWinSize = glm::vec2(uint32_t(500), uint32_t(500));
+}
+
+void WindowSystem::RenderApplicationSettings() {
+    ImVec2 windowSize(400, 200);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
+    if (ImGui::Begin(Locale::GetText(LocaleKey::SETTINGS),
+                     nullptr,
+                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)) {
+
+        if (ImGui::BeginTabBar("SettingsTabs")) {
+
+            if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::LANGUAGE))) {
+                ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_LANGUAGE));
+
+                if (ImGui::RadioButton(Locale::GetText(LocaleKey::CZECH),
+                                       s_currentLanguage == Language::CZECH)) {
+                    s_currentLanguage = Language::CZECH;
+                    Locale::SetLanguage(s_currentLanguage);
+                }
+                if (ImGui::RadioButton(Locale::GetText(LocaleKey::ENGLISH),
+                                       s_currentLanguage == Language::ENGLISH)) {
+                    s_currentLanguage = Language::ENGLISH;
+                    Locale::SetLanguage(s_currentLanguage);
+                }
+
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::DISPLAY))) {
+                ImGui::EndTabItem();
+            }
+
+            ImGui::EndTabBar();
+        }
+
+        ImGui::Separator();
+        float windowWidth = ImGui::GetWindowSize().x;
+        float buttonWidth = ImGui::CalcTextSize(Locale::GetText(LocaleKey::CLOSE)).x
+                            + ImGui::GetStyle().FramePadding.x * 2.0f;
+        ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
+
+        if (ImGui::Button(Locale::GetText(LocaleKey::CLOSE), ImVec2(buttonWidth, 0))) {
+            s_showApplicationSettings = false;
+        }
+
+        ImGui::End();
+    }
 }
 
 void WindowSystem::RenderWindows(bool isObjectRendered) {
     ImVec2 mainMenuBarSize = this->RenderMainMenuBar(isObjectRendered);
     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
-    ImGui::Begin("Viewport",
+    ImGui::Begin(Locale::GetText(LocaleKey::VIEWPORT),
                  nullptr,
                  ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
                      | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
@@ -108,32 +90,32 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
         s_viewportWinSize = glm::vec2((uint16_t)winSize.x, (uint16_t)winSize.y);
 
     if (isObjectRendered)
-        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(Core::GetRenderTargetTexture())),
+        ImGui::Image(static_cast<ImTextureID>(Core::GetRenderTargetTexture()),
                      ImVec2(s_viewportWinSize.x, s_viewportWinSize.y));
     else {
         float windowWidth = ImGui::GetWindowSize().x;
         float windowHeight = ImGui::GetWindowSize().y;
 
-        float textWidth = ImGui::CalcTextSize("Není načtený žádný model").x;
-        float textHeight = ImGui::CalcTextSize("Není načtený žádný model").y;
+        float textWidth = ImGui::CalcTextSize(Locale::GetText(LocaleKey::NO_MODEL_LOADED)).x;
+        float textHeight = ImGui::CalcTextSize(Locale::GetText(LocaleKey::NO_MODEL_LOADED)).y;
 
         ImGui::SetCursorPos(
             ImVec2((windowWidth - textWidth) / 2.0f, (windowHeight - textHeight) / 2.0f - 60.f));
-        ImGui::Text("Není načtený žádný model");
+        ImGui::Text("%s", Locale::GetText(LocaleKey::NO_MODEL_LOADED));
 
-        textWidth = ImGui::CalcTextSize("Otevřete model pomocí menu Soubor -> Otevřít").x;
-        textHeight = ImGui::CalcTextSize("Otevřete model pomocí menu Soubor -> Otevřít").y;
+        textWidth = ImGui::CalcTextSize(Locale::GetText(LocaleKey::OPEN_MODEL_WITH_FILE_MENU)).x;
+        textHeight = ImGui::CalcTextSize(Locale::GetText(LocaleKey::OPEN_MODEL_WITH_FILE_MENU)).y;
 
         ImGui::SetCursorPos(
             ImVec2((windowWidth - textWidth) / 2.0f, (windowHeight - textHeight) / 2.0f - 30.f));
-        ImGui::Text("Otevřete model pomocí menu Soubor -> Otevřít");
+        ImGui::Text("%s", Locale::GetText(LocaleKey::OPEN_MODEL_WITH_FILE_MENU));
 
         ImGui::Dummy(ImVec2(0, 10));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(0, 10));
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30, 10));
         ImGui::SetCursorPosX((windowWidth - 120) / 2.0f);
-        if (ImGui::Button("Načíst model", ImVec2(150, 50))) {
+        if (ImGui::Button(Locale::GetText(LocaleKey::LOAD_MODEL), ImVec2(150, 50))) {
             OpenModelSelectionDialog();
         }
         ImGui::PopStyleVar();
@@ -159,7 +141,7 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
 
     ImGui::End();
 
-    ImGui::Begin("Vlastnosti",
+    ImGui::Begin(Locale::GetText(LocaleKey::PROPERTIES),
                  nullptr,
                  ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
                      | ImGuiWindowFlags_NoBringToFrontOnFocus);
@@ -173,7 +155,7 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
 
     RenderClearColorPicker();
     RenderModelInfo();
-    ImGui::Checkbox("Wireframe", &m_inputData.m_wireframeMode);
+    ImGui::Checkbox(Locale::GetText(LocaleKey::WIREFRAME_MODE), &m_inputData.m_wireframeMode);
     ImGui::Separator();
     if (m_renderGizmo)
         ImGui::BeginDisabled();
@@ -190,6 +172,10 @@ void WindowSystem::RenderWindows(bool isObjectRendered) {
     RenderModelErrorWindow();
     RenderTextureErrorWindow();
     ImGui::End();
+
+    if (s_showApplicationSettings) {
+        RenderApplicationSettings();
+    }
 }
 
 void WindowSystem::OpenModelSelectionDialog() {
@@ -199,7 +185,7 @@ void WindowSystem::OpenModelSelectionDialog() {
     std::string extension = modelPath.extension().string();
 
     if (modelPath.empty()) {
-        Log::Info("Nebyl vybraný žádný soubor");
+        Log::Info(Locale::GetText(LocaleKey::FILE_WAS_NOT_SELECTED));
         return;
     }
 
@@ -215,15 +201,15 @@ void WindowSystem::OpenModelSelectionDialog() {
 
 void WindowSystem::RenderModelErrorWindow() {
     if (s_showModelErrorWindow) {
-        ImGui::OpenPopup("Nebyl vybraný 3D model");
-        if (ImGui::BeginPopupModal("Nebyl vybraný 3D model",
+        ImGui::OpenPopup(Locale::GetText(LocaleKey::FILE_WAS_NOT_SELECTED));
+        if (ImGui::BeginPopupModal(Locale::GetText(LocaleKey::MODEL_WAS_NOT_SELECTED),
                                    nullptr,
                                    ImGuiWindowFlags_AlwaysAutoResize
                                        | ImGuiWindowFlags_NoCollapse)) {
-            ImGui::Text("Vybraný soubor nemá známou příponu 3D modelu\n\n");
+            ImGui::Text("%s", Locale::GetText(LocaleKey::FILE_EXTENSION_NOT_SUPPORTED));
             ImGui::Separator();
 
-            if (ImGui::Button("OK", ImVec2(120, 0))) {
+            if (ImGui::Button(Locale::GetText(LocaleKey::OK), ImVec2(120, 0))) {
                 s_showModelErrorWindow = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -235,15 +221,15 @@ void WindowSystem::RenderModelErrorWindow() {
 
 void WindowSystem::RenderTextureErrorWindow() {
     if (s_showTextureErrorWindow) {
-        ImGui::OpenPopup("Nebyla vybráný podporovaný formát textury");
-        if (ImGui::BeginPopupModal("Nebyla vybráný podporovaný formát textury",
-                                   nullptr,
-                                   ImGuiWindowFlags_AlwaysAutoResize
-                                       | ImGuiWindowFlags_NoCollapse)) {
-            ImGui::Text("Vybraný soubor nemá známou/podporovanou příponu textury\n\n");
+        ImGui::OpenPopup(Locale::GetText(LocaleKey::CHOOSED_TEXTURE_HAS_UNKNOWN_EXTENSION));
+        if (ImGui::BeginPopupModal(
+                Locale::GetText(LocaleKey::CHOOSED_TEXTURE_HAS_UNKNOWN_EXTENSION),
+                nullptr,
+                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse)) {
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSED_TEXTURE_HAS_UNKNOWN_EXTENSION));
             ImGui::Separator();
 
-            if (ImGui::Button("OK", ImVec2(120, 0))) {
+            if (ImGui::Button(Locale::GetText(LocaleKey::OK), ImVec2(120, 0))) {
                 s_showTextureErrorWindow = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -253,7 +239,7 @@ void WindowSystem::RenderTextureErrorWindow() {
 }
 
 void WindowSystem::RenderShaderSettings() {
-    ImGui::Text("Nastavení shaderu");
+    ImGui::Text("%s", Locale::GetText(LocaleKey::SHADER_SETTINGS));
     int shaderType = 0;
     if (m_inputData.m_simpleShaderActive)
         shaderType = 0;
@@ -262,17 +248,17 @@ void WindowSystem::RenderShaderSettings() {
     if (m_inputData.m_reflectShaderActive)
         shaderType = 2;
 
-    if (ImGui::RadioButton("Jednoduchý shader", shaderType == 0)) {
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::SIMPLE_SHADER), shaderType == 0)) {
         shaderType = 0;
     }
-    if (ImGui::RadioButton("Light shader", shaderType == 1)) {
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::LIGHT_SHADER), shaderType == 1)) {
         shaderType = 1;
     }
 
     if (!m_inputData.m_skyboxActive)
         ImGui::BeginDisabled();
 
-    if (ImGui::RadioButton("Reflect shader", shaderType == 2)) {
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::REFLECT_SHADER), shaderType == 2)) {
         shaderType = 2;
     }
 
@@ -287,7 +273,7 @@ void WindowSystem::RenderShaderSettings() {
         ImGui::BeginDisabled();
     }
 
-    ImGui::Checkbox("Zobrazit skybox", &m_inputData.m_skyboxActive);
+    ImGui::Checkbox(Locale::GetText(LocaleKey::ENABLE_SKYBOX), &m_inputData.m_skyboxActive);
 
     if (m_inputData.m_reflectShaderActive) {
         ImGui::EndDisabled();
@@ -297,9 +283,14 @@ void WindowSystem::RenderShaderSettings() {
         ImGui::BeginDisabled();
     }
 
-    ImGui::SliderFloat("Intenzita světla", &m_inputData.m_lightIntensity, 0.0f, 1.0f);
-    ImGui::SliderFloat("Lesklost materiálu", &m_inputData.m_materialShininess, 0.0f, 256.0f);
-    ImGui::DragFloat3("Pozice světla", glm::value_ptr(m_inputData.m_lightPos), 1.0f);
+    ImGui::SliderFloat(
+        Locale::GetText(LocaleKey::LIGHT_INTENSITY), &m_inputData.m_lightIntensity, 0.0f, 1.0f);
+    ImGui::SliderFloat(Locale::GetText(LocaleKey::MATERIAL_SHININESS),
+                       &m_inputData.m_materialShininess,
+                       0.0f,
+                       256.0f);
+    ImGui::DragFloat3(
+        Locale::GetText(LocaleKey::LIGHT_POS), glm::value_ptr(m_inputData.m_lightPos), 1.0f);
     if (!m_inputData.m_lightShaderActive) {
         ImGui::EndDisabled();
     }
@@ -313,15 +304,21 @@ ImVec2 WindowSystem::RenderMainMenuBar(bool isObjectRendered) {
     if (ImGui::BeginMainMenuBar()) {
         mainMenuBarSize = ImGui::GetWindowSize();
 
-        if (ImGui::BeginMenu("Soubor")) {
-            if (ImGui::MenuItem("Otevřít")) {
+        if (ImGui::BeginMenu(Locale::GetText(LocaleKey::FILE))) {
+            if (ImGui::MenuItem(Locale::GetText(LocaleKey::OPEN))) {
                 WindowSystem::OpenModelSelectionDialog();
             }
 
-            if (ImGui::MenuItem("Zavřít")) {
+            if (ImGui::MenuItem(Locale::GetText(LocaleKey::CLOSE))) {
                 exit(0);
             }
             ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::Button(Locale::GetText(LocaleKey::SETTINGS))) {
+            s_showApplicationSettings = !s_showApplicationSettings;
         }
 
         if (!isObjectRendered)
@@ -332,8 +329,9 @@ ImVec2 WindowSystem::RenderMainMenuBar(bool isObjectRendered) {
 
         if (m_cameraSettings.cameraType == 1) {
             ImGui::Separator();
-            ImGui::Text("Pohyb kamery pomocí WASD");
-            ImGui::Text("Pro odemčení kurzoru stiskněte F2, pro zamčení F1");
+            ImGui::Text("%s", Locale::GetText(LocaleKey::MOVE_CAMERA_USING_WASD));
+            ImGui::Text("%s",
+                        Locale::GetText(LocaleKey::FOR_UNLOCK_CURSOR_PRESS_F2_FOR_LOCK_PRESS_F1));
         }
 
         ImGui::EndMainMenuBar();
@@ -343,19 +341,21 @@ ImVec2 WindowSystem::RenderMainMenuBar(bool isObjectRendered) {
 
 void WindowSystem::RenderClearColorPicker() {
     static ImVec4 color = ImVec4(1.f, 1.f, 1.f, 1.f);
-    ImGui::ColorEdit3("Barva pozadí", (float*)&color);
+    ImGui::ColorEdit3(Locale::GetText(LocaleKey::BACKGROUND_COLOR), (float*)&color);
     Core::SetBackgroundColor(glm::vec3(color.x, color.y, color.z));
 }
 
 void WindowSystem::RenderModelInfo() {
     ImGui::Separator();
-    ImGui::Text("Model info");
-    ImGui::Text("Počet vertexů: %d", Renderer::GetInstance().GetVerticesCount());
-    ImGui::Text("Počet indexů: %d", Renderer::GetInstance().GetIndicesCount());
+    ImGui::Text("%s", Locale::GetText(LocaleKey::MODEL_INFO));
+    ImGui::Text((std::string(Locale::GetText(LocaleKey::VERTEX_COUNT)) + std::string("%d")).c_str(),
+                Renderer::GetInstance().GetVerticesCount());
+    ImGui::Text((std::string(Locale::GetText(LocaleKey::INDEX_COUNT)) + std::string("%d")).c_str(),
+                Renderer::GetInstance().GetIndicesCount());
     ImGui::Separator();
 }
 
-MaterialSelection::MaterialSelection(std::optional<std::string> diffuse,
+MaterialSelection::MaterialSelection(std::variant<std::string, glm::vec3> diffuse,
                                      std::optional<std::string> specular) {
     this->diffuse = std::move(diffuse);
     this->specular = std::move(specular);
@@ -365,71 +365,140 @@ MaterialSelection::MaterialSelection()
     : diffuse(std::nullopt)
     , specular(std::nullopt) {}
 
-bool WindowSystem::RenderTexturesDialog(MaterialSelection& materialSelection,
+bool WindowSystem::RenderMaterialDialog(MaterialSelection& materialSelection,
                                         std::vector<std::string>& textures) {
     if (s_showTextureErrorWindow) {
         return false;
     }
 
-    ImGui::Begin("Automatické hledání textur",
+    ImVec2 windowSize(400, 300);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_FirstUseEver);
+
+    ImGui::Begin(Locale::GetText(LocaleKey::AUTOMATIC_TEXTURE_SELECTION),
                  nullptr,
                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("Vyberte diffuse texturu");
 
-    for (auto& texture : textures) {
-        bool isSelected = (materialSelection.diffuse == texture);
-        if (ImGui::Selectable((texture + " -> Diffuse").c_str(), isSelected)) {
-            materialSelection.diffuse = texture;
-            Log::Info("Diffuse textura: " + texture);
+    static ImVec4 color = ImVec4(1.f, 1.f, 1.f, 1.f);
+    if (ImGui::BeginTabBar("MaterialTabs")) {
+        if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::DIFFUSE))) {
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_DIFFUSE_TEXTURE));
+
+            if (ImGui::RadioButton(Locale::GetText(LocaleKey::DIFFUSE_COLOR),
+                                   s_isDiffuseTexture == 0)) {
+                s_isDiffuseTexture = false;
+            }
+
+            if (ImGui::RadioButton(Locale::GetText(LocaleKey::DIFFUSE_TEXTURE),
+                                   s_isDiffuseTexture == 1)) {
+                s_isDiffuseTexture = true;
+            }
+
+            if (s_isDiffuseTexture == 0)
+                ImGui::BeginDisabled();
+
+            for (auto& texture : textures) {
+                bool isSelected
+                    = materialSelection.diffuse.has_value()
+                      && std::holds_alternative<std::string>(materialSelection.diffuse.value())
+                      && std::get<std::string>(materialSelection.diffuse.value()) == texture;
+
+                if (ImGui::Selectable((texture + " -> Diffuse").c_str(), isSelected)) {
+                    materialSelection.diffuse = texture;
+                    Log::Info("Diffuse textura: " + texture);
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+
+            ImGui::Separator();
+            ImGui::Checkbox(Locale::GetText(LocaleKey::FLIP_TEXTURE), &s_flipTexture);
+            if (ImGui::Button(Locale::GetText(LocaleKey::CHOOSE_TEXTURE_MANUALLY))) {
+                auto texture = FileDialogManager::GetInstance().InvokeFileDialog();
+                if (texture.empty()) {
+                    ImGui::EndTabItem();
+                    ImGui::EndTabBar();
+                    ImGui::End();
+                    return false;
+                }
+                std::string extension = std::filesystem::path(texture).extension().string();
+                if (std::find(SUPPORTED_TEXTURE_EXTENSIONS.begin(),
+                              SUPPORTED_TEXTURE_EXTENSIONS.end(),
+                              extension)
+                    == SUPPORTED_TEXTURE_EXTENSIONS.end()) {
+                    Log::Error("Nepodporovaný formát textury:" + texture);
+                    s_showTextureErrorWindow = true;
+                    ImGui::EndTabBar();
+                    ImGui::End();
+                    return false;
+                }
+                else {
+                    materialSelection.diffuse = texture;
+                }
+            }
+
+            if (s_isDiffuseTexture == 0)
+                ImGui::EndDisabled();
+
+            if (s_isDiffuseTexture == 1)
+                ImGui::BeginDisabled();
+            ImGui::Separator();
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_COLOR_MANUALLY));
+
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_MODEL_COLOR));
+            ImGui::ColorEdit3(Locale::GetText(LocaleKey::MODEL_COLOR), (float*)&color);
+
+            if (s_isDiffuseTexture == 1)
+                ImGui::EndDisabled();
+
+            ImGui::EndTabItem();
         }
-        if (isSelected) {
-            ImGui::SetItemDefaultFocus();
+
+        if (ImGui::BeginTabItem(Locale::GetText(LocaleKey::SPECULAR))) {
+            ImGui::Text("%s", Locale::GetText(LocaleKey::CHOOSE_SPECULAR_TEXTURE));
+
+            for (auto& texture : textures) {
+                bool isSelected = (materialSelection.specular == texture);
+                if (ImGui::Selectable((texture + " -> Specular").c_str(), isSelected)) {
+                    materialSelection.specular = texture;
+                    Log::Info("Specular textura: " + texture);
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::Separator();
+            ImGui::Checkbox(Locale::GetText(LocaleKey::FLIP_TEXTURE), &s_flipTexture);
+            if (ImGui::Button(Locale::GetText(LocaleKey::CHOOSE_TEXTURE_MANUALLY))) {
+                auto texture = FileDialogManager::GetInstance().InvokeFileDialog();
+                std::string extension = std::filesystem::path(texture).extension().string();
+                if (std::find(SUPPORTED_TEXTURE_EXTENSIONS.begin(),
+                              SUPPORTED_TEXTURE_EXTENSIONS.end(),
+                              extension)
+                    == SUPPORTED_TEXTURE_EXTENSIONS.end()) {
+                    Log::Error("Nepodporovaný formát textury:" + texture);
+                    s_showTextureErrorWindow = true;
+                    ImGui::EndTabBar();
+                    ImGui::End();
+                    return false;
+                }
+                else {
+                    materialSelection.specular = texture;
+                }
+            }
+            ImGui::EndTabItem();
         }
+
+        ImGui::EndTabBar();
     }
 
     ImGui::Separator();
-    ImGui::Text("Vyberte specular texturu");
-
-    for (auto& texture : textures) {
-        bool isSelected = (materialSelection.specular == texture);
-        if (ImGui::Selectable((texture + " -> Specular").c_str(), isSelected)) {
-            materialSelection.specular = texture;
-            Log::Info("Specular textura: " + texture);
-        }
-        if (isSelected) {
-            ImGui::SetItemDefaultFocus();
-        }
-    }
-
-    ImGui::Text("Nebo vyberte texturu ručně");
-    ImGui::Checkbox("Obrátit texturu", &s_flipTexture);
-    if (ImGui::Button("Vybrat texturu")) {
-        auto texture = FileDialogManager::GetInstance().InvokeFileDialog();
-        std::string extension = std::filesystem::path(texture).extension().string();
-        if (std::find(
-                SUPPORTED_TEXTURE_EXTENSIONS.begin(), SUPPORTED_TEXTURE_EXTENSIONS.end(), extension)
-            == SUPPORTED_TEXTURE_EXTENSIONS.end()) {
-            Log::Error("Nepodporovaný formát textury:" + texture);
-            s_showTextureErrorWindow = true;
-            ImGui::End();
-            return false;
-        }
-        else {
-            materialSelection.diffuse = texture;
-        }
-    }
-
-    ImGui::Separator();
-    ImGui::Text("Nebo vyberte barvu modelu");
-
-    if (ImGui::Button("Vybrat barvu")) {
-        materialSelection.diffuse = std::string("");
-    }
-
-    ImGui::Separator();
-    if (ImGui::Button("Potvrdit")) {
+    if (ImGui::Button(Locale::GetText(LocaleKey::APPLY))) {
         ImGui::End();
-        if (!materialSelection.diffuse.has_value()) {
+        if (s_isDiffuseTexture == 0) {
+            materialSelection.diffuse = glm::vec3(color.x, color.y, color.z);
+        }
+        else if (s_isDiffuseTexture == 1 && !materialSelection.diffuse.has_value()) {
             return false;
         }
         return true;
@@ -440,12 +509,13 @@ bool WindowSystem::RenderTexturesDialog(MaterialSelection& materialSelection,
 }
 
 const std::optional<glm::vec3> WindowSystem::RenderModelColorPicker() {
-    ImGui::Begin(
-        "Barva modelu", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin(Locale::GetText(LocaleKey::MODEL_COLOR),
+                 nullptr,
+                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
     static ImVec4 color = ImVec4(1.f, 1.f, 1.f, 1.f);
-    ImGui::ColorEdit3("Barva modelu", (float*)&color);
+    ImGui::ColorEdit3(Locale::GetText(LocaleKey::MODEL_COLOR), (float*)&color);
 
-    if (ImGui::Button("Potvrdit")) {
+    if (ImGui::Button(Locale::GetText(LocaleKey::APPLY))) {
         ImGui::End();
         return glm::vec3(color.x, color.y, color.z);
     }
@@ -454,18 +524,20 @@ const std::optional<glm::vec3> WindowSystem::RenderModelColorPicker() {
 }
 
 void WindowSystem::RenderGizmoSettings() {
-    ImGui::Text("Nastavení gizma");
-    ImGui::Checkbox("Zobrazit gizmo", &m_renderGizmo);
+    ImGui::Text("%s", Locale::GetText(LocaleKey::GIZMO_SETTINGS));
+    ImGui::Checkbox(Locale::GetText(LocaleKey::SHOW_GIZMO), &m_renderGizmo);
     if (!m_renderGizmo) {
         ImGui::BeginDisabled();
     }
 
-    ImGui::SliderFloat("Velikost gizma", &m_gizmoSizeMultiplier, 0.5, 1.5);
-    if (ImGui::RadioButton("Přesun", m_gizmoOperation == ImGuizmo::TRANSLATE))
+    ImGui::SliderFloat(Locale::GetText(LocaleKey::GIZMO_SIZE), &m_gizmoSizeMultiplier, 0.5, 1.5);
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::TRANSLATE),
+                           m_gizmoOperation == ImGuizmo::TRANSLATE))
         m_gizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::RadioButton("Rotace", m_gizmoOperation == ImGuizmo::ROTATE))
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::ROTATE),
+                           m_gizmoOperation == ImGuizmo::ROTATE))
         m_gizmoOperation = ImGuizmo::ROTATE;
-    if (ImGui::RadioButton("Škálování", m_gizmoOperation == ImGuizmo::SCALE))
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::SCALE), m_gizmoOperation == ImGuizmo::SCALE))
         m_gizmoOperation = ImGuizmo::SCALE;
 
     if (!m_renderGizmo) {
@@ -476,23 +548,28 @@ void WindowSystem::RenderGizmoSettings() {
 }
 
 void WindowSystem::RenderCameraSettings() {
-    ImGui::Text("Nastavení kamery");
-    if (ImGui::RadioButton("Freefly kamera", m_cameraSettings.cameraType == 1))
+    ImGui::Text("%s", Locale::GetText(LocaleKey::CAMERA_SETTINGS));
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::FREEFLY_CAMERA),
+                           m_cameraSettings.cameraType == 1))
         m_cameraSettings.cameraType = 1;
-    if (ImGui::RadioButton("Orbitální kamera", m_cameraSettings.cameraType == 0))
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::ORBIT_CAMERA),
+                           m_cameraSettings.cameraType == 0))
         m_cameraSettings.cameraType = 0;
     if (m_cameraSettings.cameraType == 1) {
         ImGui::BeginDisabled();
     }
     ImGui::Separator();
-    if (ImGui::RadioButton("Perspektivní projekce", m_cameraSettings.projectionType == 2))
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::PERSPECTIVE_PROJECTION),
+                           m_cameraSettings.projectionType == 2))
         m_cameraSettings.projectionType = 2;
-    if (ImGui::RadioButton("Ortogonální projekce", m_cameraSettings.projectionType == 3))
+    if (ImGui::RadioButton(Locale::GetText(LocaleKey::ORTHOGRAPHIC_PROJECTION),
+                           m_cameraSettings.projectionType == 3))
         m_cameraSettings.projectionType = 3;
 
     if (m_cameraSettings.projectionType != 2)
         ImGui::BeginDisabled();
-    ImGui::SliderFloat("Zoom", &m_cameraSettings.zoomMultiplier, 0.1f, 10.0f);
+    ImGui::SliderFloat(
+        Locale::GetText(LocaleKey::ZOOM), &m_cameraSettings.zoomMultiplier, 0.1f, 10.0f);
     if (m_cameraSettings.projectionType != 2)
         ImGui::EndDisabled();
 

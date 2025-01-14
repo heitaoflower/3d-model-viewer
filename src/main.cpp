@@ -1,5 +1,4 @@
 ﻿#include "ViewerApp.hpp"
-#include "defines.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <string>
@@ -21,7 +20,6 @@ std::string dirname(const std::string& path) {
 
 int main(int argc, char* argv[]) {
     std::string dir = dirname(argv[0]);
-
     if (chdir(dir.c_str()) != 0) {
         Log::Error("Chyba při změně pracovního adresáře.");
         return 1;

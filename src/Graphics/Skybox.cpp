@@ -1,4 +1,5 @@
 #include "Skybox.hpp"
+#include "../Core/CameraSystem.hpp"
 
 Skybox::Skybox(const std::vector<std::string>& cubemapTextures) {
     m_cubemapTextures = cubemapTextures;
@@ -22,6 +23,23 @@ Skybox::Skybox(const std::string& folderDirectoryPath, const std::string& fileFo
 
 Skybox::~Skybox() {
     delete m_cubemapShader;
+}
+
+void Skybox::RenderSkybox() {
+    glm::mat4 view = glm::mat4(glm::mat3(CameraSystem::GetInstance().GetViewMatrix()));
+    glm::mat4 projection = glm::perspective(
+        glm::radians(CameraSystem::GetInstance().GetFov()), 16.f / 9.f, 0.1f, 150.0f);
+
+    glDepthFunc(GL_LEQUAL);
+    m_cubemapShader->SetUniform("view", view);
+    m_cubemapShader->SetUniform("projection", projection);
+    m_cubemapShader->Bind();
+    glBindVertexArray(m_vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
+    OpenglAPI::DrawArrays(GL_TRIANGLES, 36);
+    glDepthFunc(GL_LESS);
+    glBindVertexArray(0);
 }
 
 uint32_t Skybox::LoadTextureFromFile(std::vector<std::string> cubemapTextures) {

@@ -1,0 +1,61 @@
+No model loaded
+Viewport
+Open a model using the File -> Open menu
+Load model
+Properties
+Wireframe
+No file selected
+Selected file has an unknown 3D model extension
+Ok
+No 3D model selected
+No supported model format selected
+No supported texture format selected
+Shader settings
+Simple shader
+Lighting shader
+Reflection shader
+Show skybox
+Light intensity
+Material shininess
+Light position
+File
+Open
+Close
+Move camera using WASD
+Press F2 to unlock cursor, F1 to lock
+Background color
+Model info
+Number of vertices
+Number of indices
+Automatic texture search
+Diffuse
+Select diffuse texture
+Specular
+Select specular texture
+Manual selection
+Flip texture
+Or select texture manually
+Or select model color
+Select color manually
+Confirm
+Model color
+Gizmo settings
+Show gizmo
+Gizmo size
+Translate
+Rotate
+Scale
+Camera settings
+Freefly camera
+Orbital camera
+Perspective projection
+Orthographic projection
+Zoom
+Settings
+Display
+Language
+Choose language
+English
+Czech
+Use diffuse texture
+Use color as diffuse texture

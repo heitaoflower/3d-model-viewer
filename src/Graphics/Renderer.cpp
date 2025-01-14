@@ -1,4 +1,5 @@
 ﻿#include "Renderer.hpp"
+#include "../AssetManager.hpp"
 
 Renderer& Renderer::GetInstance() {
     static Renderer instance;
@@ -11,69 +12,59 @@ void Renderer::RenderModel(const Model& model, const InputData& inputData) {
 
     m_indicesCount = model.GetIndicesCount();
     m_verticesCount = model.GetVerticesCount();
-    if (m_activeShader == Shaders::LIGHT) {
-        m_lightShader.Bind();
-        m_lightShader.SetUniform("projection", CameraSystem::GetInstance().GetProjectionMatrix());
-        m_lightShader.SetUniform("view", CameraSystem::GetInstance().GetViewMatrix());
-        m_lightShader.SetUniform("model", modelMatrix);
-        m_lightShader.SetUniform("intensityMultiplier", m_lightIntensity);
-        m_lightShader.SetUniform("color", model.GetColor());
-        m_lightShader.SetUniform("lightPos", inputData.GetLightPos());
-        m_lightShader.SetUniform("shininess", inputData.GetMaterialShininess());
+    if (m_activeShader == ShaderType::LIGHT) {
+        m_shaderBatch.lightShader.Bind();
+        m_shaderBatch.lightShader.SetUniform("projection",
+                                             CameraSystem::GetInstance().GetProjectionMatrix());
+        m_shaderBatch.lightShader.SetUniform("view", CameraSystem::GetInstance().GetViewMatrix());
+        m_shaderBatch.lightShader.SetUniform("model", modelMatrix);
+        m_shaderBatch.lightShader.SetUniform("intensityMultiplier", m_lightIntensity);
+        m_shaderBatch.lightShader.SetUniform("color", model.GetColor());
+        m_shaderBatch.lightShader.SetUniform("lightPos", inputData.GetLightPos());
+        m_shaderBatch.lightShader.SetUniform("shininess", inputData.GetMaterialShininess());
 
-        m_lightShader.SetUniform("diffuse", 0);
-        m_lightShader.SetUniform("hasSpecularTexture", model.GetSpecularTex() != 0);
-        m_lightShader.SetUniform("specular", 1);
+        m_shaderBatch.lightShader.SetUniform("diffuse", 0);
+        m_shaderBatch.lightShader.SetUniform("hasSpecularTexture", model.GetSpecularTex() != 0);
+        m_shaderBatch.lightShader.SetUniform("specular", 1);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, model.GetDiffuseTex());
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, model.GetSpecularTex());
     }
-    else if (m_activeShader == Shaders::SIMPLE) {
-        m_simpleShader.Bind();
-        m_simpleShader.SetUniform("projection", CameraSystem::GetInstance().GetProjectionMatrix());
-        m_simpleShader.SetUniform("view", CameraSystem::GetInstance().GetViewMatrix());
-        m_simpleShader.SetUniform("model", modelMatrix);
-        m_simpleShader.SetUniform("color", model.GetColor());
-        m_simpleShader.SetUniform("diffuse", 0);
+    else if (m_activeShader == ShaderType::SIMPLE) {
+        m_shaderBatch.simpleShader.Bind();
+        m_shaderBatch.simpleShader.SetUniform("projection",
+                                              CameraSystem::GetInstance().GetProjectionMatrix());
+        m_shaderBatch.simpleShader.SetUniform("view", CameraSystem::GetInstance().GetViewMatrix());
+        m_shaderBatch.simpleShader.SetUniform("model", modelMatrix);
+        m_shaderBatch.simpleShader.SetUniform("color", model.GetColor());
+        m_shaderBatch.simpleShader.SetUniform("diffuse", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, model.GetDiffuseTex());
     }
     else {
-        m_reflect.Bind();
-        m_reflect.SetUniform("projection", CameraSystem::GetInstance().GetProjectionMatrix());
-        m_reflect.SetUniform("view", CameraSystem::GetInstance().GetViewMatrix());
-        m_reflect.SetUniform("model", modelMatrix);
-        m_reflect.SetUniform("cameraPos",
-                             CameraSystem::GetInstance().GetActiveCameraType() == Cameras::ARCBALL
-                                 ? CameraSystem::GetInstance().GetViewMatrix()[3]
-                                 : glm::vec3(0.0f));
+        m_shaderBatch.reflect.Bind();
+        m_shaderBatch.reflect.SetUniform("projection",
+                                         CameraSystem::GetInstance().GetProjectionMatrix());
+        m_shaderBatch.reflect.SetUniform("view", CameraSystem::GetInstance().GetViewMatrix());
+        m_shaderBatch.reflect.SetUniform("model", modelMatrix);
+        m_shaderBatch.reflect.SetUniform("cameraPos",
+                                         CameraSystem::GetInstance().GetActiveCameraType()
+                                                 == Cameras::ARCBALL
+                                             ? CameraSystem::GetInstance().GetViewMatrix()[3]
+                                             : glm::vec3(0.0f));
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetCubeMapTex());
-        m_reflect.SetUniform("skybox", 0);
+        m_shaderBatch.reflect.SetUniform("skybox", 0);
     }
 
     model.DrawArrays();
 }
 
-void Renderer::RenderSkybox() {
-    glm::mat4 view = glm::mat4(glm::mat3(CameraSystem::GetInstance().GetViewMatrix()));
-    glm::mat4 projection = glm::perspective(
-        glm::radians(CameraSystem::GetInstance().GetFov()), 16.f / 9.f, 0.1f, 150.0f);
-
-    glDepthFunc(GL_LEQUAL);
-    m_skybox.GetSkyboxShader().SetUniform("view", view);
-    m_skybox.GetSkyboxShader().SetUniform("projection", projection);
-    m_skybox.GetSkyboxShader().Bind();
-    uint32_t vao = m_skybox.GetVAO();
-    glBindVertexArray(vao);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox.GetCubeMapTex());
-    OpenglAPI::DrawArrays(GL_TRIANGLES, 36);
-    glDepthFunc(GL_LESS);
-    glBindVertexArray(0);
+void Renderer::RenderAdditional() {
+    m_skybox.RenderSkybox();
 }
 
 uint32_t Renderer::GetVerticesCount() const {
@@ -84,7 +75,7 @@ uint32_t Renderer::GetIndicesCount() const {
     return m_indicesCount;
 }
 
-void Renderer::SetActiveShader(Shaders active) {
+void Renderer::SetActiveShader(ShaderType active) {
     m_activeShader = active;
 }
 
@@ -98,29 +89,13 @@ void Renderer::SetWireframeMode(bool active) {
 }
 
 Renderer::Renderer()
-    : m_activeShader(Shaders::LIGHT)
+    : m_activeShader(ShaderType::LIGHT)
     , m_verticesCount(0)
     , m_indicesCount(0)
     , m_lightIntensity(1.0f)
     , m_wireframeMode(false)
-    , m_skybox("/home/dominik/Projekty/3d-model-viewer/res/skybox1", ".jpg")
-    , m_reflect((std::string(GLOBAL_PATH)
-                 + "/home/dominik/Projekty/3d-model-viewer/res/reflect.frag.glsl")
-                    .c_str(),
-                (std::string(GLOBAL_PATH)
-                 + "/home/dominik/Projekty/3d-model-viewer/res/reflect.vert.glsl")
-                    .c_str())
-    , m_lightShader(
-          (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/light.frag.glsl")
-              .c_str(),
-          (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/light.vert.glsl")
-              .c_str())
-    , m_simpleShader(
-          (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/simple.frag.glsl")
-              .c_str(),
-          (std::string(GLOBAL_PATH) + "/home/dominik/Projekty/3d-model-viewer/res/simple.vert.glsl")
-              .c_str()) {}
+    , m_skybox(AssetManager::GetAssetPath(Assets::SKYBOX_FOLDER), ".jpg") {}
 
 Shader& Renderer::GetShader() {
-    return m_lightShader;
+    return m_shaderBatch.lightShader;
 }

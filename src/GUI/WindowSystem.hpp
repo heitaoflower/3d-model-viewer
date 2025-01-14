@@ -2,63 +2,23 @@
 #include "../Core/Core.hpp"
 #include "../Core/Window.hpp"
 #include "../Tools/FileDialog.hpp"
+#include "GuiData.hpp"
 #include "ImGuizmo.h"
 #include "imgui.h"
 #include <cstdint>
 #include <filesystem>
 #include <optional>
+#include <variant>
 #include <vector>
 #include "../constants.hpp"
-
-enum class Shaders : uint8_t;
+#include "../Locale/Locale.hpp"
 
 struct MaterialSelection {
-    std::optional<std::string> diffuse;
+    std::optional<std::variant<std::string, glm::vec3>> diffuse;
     std::optional<std::string> specular;
 
-    MaterialSelection(std::optional<std::string> diffuse, std::optional<std::string> specular);
+    MaterialSelection(std::variant<std::string, glm::vec3>, std::optional<std::string> specular);
     MaterialSelection();
-};
-
-struct InputData {
-  private:
-    glm::vec3 m_modelPos;
-    glm::vec3 m_modelRot;
-    glm::vec3 m_modelScale;
-    float m_modelRotAngle;
-    bool m_allowCameraInput;
-    bool m_lightShaderActive;
-    bool m_simpleShaderActive;
-    bool m_reflectShaderActive;
-    float m_lightIntensity;
-    bool m_wireframeMode;
-    glm::mat4 model;
-    float m_materialShininess;
-    glm::vec3 m_lightPos;
-    bool m_skyboxActive;
-
-  public:
-    InputData(glm::vec3 modelPos,
-              glm::vec3 modelRot,
-              glm::vec3 modelScale,
-              float modelRotAngle,
-              bool allowCameraInput);
-    [[nodiscard]] const glm::mat4 GetModelMatrix() const;
-    [[nodiscard]] bool GetAllowCameraInput() const;
-    [[nodiscard]] float GetLightIntensity() const;
-    [[nodiscard]] bool GetWireframeMode() const;
-    [[nodiscard]] glm::vec3 GetLightPos() const;
-    [[nodiscard]] float GetMaterialShininess() const;
-    [[nodiscard]] bool GetSkyboxActive() const;
-    [[nodiscard]] Shaders GetActiveShader() const;
-    friend class WindowSystem;
-};
-
-struct CameraSettings {
-    int cameraType;
-    int projectionType;
-    float zoomMultiplier;
-    CameraSettings() noexcept;
 };
 
 class WindowSystem {
@@ -73,14 +33,16 @@ class WindowSystem {
 
     static bool s_flipTexture;
 
-    static bool RenderTexturesDialog(MaterialSelection& materialSelection,
+    static bool RenderMaterialDialog(MaterialSelection& materialSelection,
                                      std::vector<std::string>& textures);
 
     static const std::optional<glm::vec3> RenderModelColorPicker();
 
   private:
+    static bool s_isDiffuseTexture;
     static glm::vec2 s_viewportWinSize;
-
+    static Language s_currentLanguage;
+    inline void RenderApplicationSettings();
     inline void RenderPositionsWidgets();
     inline void RenderClearColorPicker();
     inline void RenderModelInfo();
@@ -97,5 +59,6 @@ class WindowSystem {
     bool m_renderGizmo;
     float m_gizmoSizeMultiplier;
     static bool s_showModelErrorWindow;
+    static bool s_showApplicationSettings;
     static bool s_showTextureErrorWindow;
 };

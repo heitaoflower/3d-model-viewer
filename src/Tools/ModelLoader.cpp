@@ -42,33 +42,33 @@ void ModelLoader::RenderSelectedModel(InputData inputData) {
             m_specularTexture = 0;
         }
 
-        bool selected = WindowSystem::RenderTexturesDialog(m_materialSelection, m_texturePaths);
+        bool selected = WindowSystem::RenderMaterialDialog(m_materialSelection, m_texturePaths);
 
-        // Kontrola, zda všechny cesty obsahují podporovanou příponu textur
+        // Check for selected textures
         if (selected) {
             if (m_materialSelection.diffuse.has_value()) {
-                if (m_materialSelection.diffuse.value() != "") {
+                auto* diffuseStr = std::get_if<std::string>(&m_materialSelection.diffuse.value());
+                if (diffuseStr && !diffuseStr->empty()) {
                     if (m_diffuseTexture == 0) {
-                        m_diffuseTexture = loadTexture(m_materialSelection.diffuse.value().c_str(),
-                                                       GL_LINEAR,
-                                                       WindowSystem::s_flipTexture);
+                        m_diffuseTexture = loadTexture(
+                            diffuseStr->c_str(), GL_LINEAR, WindowSystem::s_flipTexture);
                         m_model->SetDiffuseTex(m_diffuseTexture);
                     }
                     else {
-                        updateTexture(m_diffuseTexture,
-                                      m_materialSelection.diffuse.value().c_str(),
-                                      WindowSystem::s_flipTexture);
+                        updateTexture(
+                            m_diffuseTexture, diffuseStr->c_str(), WindowSystem::s_flipTexture);
                     }
-
                     m_waitingForUserInput = USER_INPUT::NO_INPUT;
                 }
-                else {
-                    m_waitingForUserInput = USER_INPUT::COLOR_SELECTION;
+                auto* diffuseColor = std::get_if<glm::vec3>(&m_materialSelection.diffuse.value());
+                if (diffuseColor) {
+                    m_model->OverwriteColor(*diffuseColor);
+                    m_waitingForUserInput = USER_INPUT::NO_INPUT;
                 }
             }
 
             if (m_materialSelection.specular.has_value()) {
-                if (m_materialSelection.specular.value() != "") {
+                if (!m_materialSelection.specular.value().empty()) {
                     Log::Info("Specular texture: " + m_materialSelection.specular.value());
                     if (m_specularTexture == 0) {
                         m_specularTexture
@@ -84,14 +84,6 @@ void ModelLoader::RenderSelectedModel(InputData inputData) {
                     }
                 }
             }
-        }
-    }
-
-    if (m_waitingForUserInput == USER_INPUT::COLOR_SELECTION) {
-        std::optional<glm::vec3> selectedColor = WindowSystem::RenderModelColorPicker();
-        if (selectedColor.has_value()) {
-            m_model->OverwriteColor(selectedColor.value());
-            m_waitingForUserInput = USER_INPUT::NO_INPUT;
         }
     }
 
